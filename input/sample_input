@@ -6,7 +6,7 @@ AgeDay                  9                               #For "slow" mode, how ma
 AgeMin                  60                              #For "fast" mode, how many minutes back to look for recent experiments to sync
 
 
-Instrument  SSHAlias    RemoteUser  RemoteDataPath           LocalDataPath                       MountedePath (optional)
+Instrument  SSHAlias    RemoteUser  RemoteDataPath           LocalDataPath                       MountedPath (optional)
 AV400       AV400       nmr1        /home/nmr1/data          /home/nmruser/AV400_Backup          /mnt/NMRData/AV400         	 
 NEO400a     NEO400      nmr         /opt/nmrdata/nmr/data    /home/nmruser/NEO400_Backup/data    /mnt/NMRData/NEO400/data
 NEO400b     NEO400      nmr         /opt/nmrdata/nmr         /home/nmruser/NEO400_Backup         /mnt/NMRData/NEO400
