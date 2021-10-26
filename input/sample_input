@@ -1,0 +1,13 @@
+ScriptsPath             /home/nmruser/scripts           #Location of the main script and the input, emailtxt, and log folders on local machine
+SendmailPath            /usr/sbin                       #Location of the sendmail application on local machine
+ManagerEmail            greenwa2@ucmail.uc.edu          #Email address of the NMR facility manager
+FastMode                y                               #y or n-- y to run in "fast" mode looking for experiments run recently (e.g. within ~60 min)   
+AgeDay                  9                               #For "slow" mode, how many days back to look for recent experiments to sync
+AgeMin                  60                              #For "fast" mode, how many minutes back to look for recent experiments to sync
+
+
+Instrument  SSHAlias    RemoteUser  RemoteDataPath           LocalDataPath                       MountedePath (optional)
+AV400       AV400       nmr1        /home/nmr1/data          /home/nmruser/AV400_Backup          /mnt/NMRData/AV400         	 
+NEO400a     NEO400      nmr         /opt/nmrdata/nmr/data    /home/nmruser/NEO400_Backup/data    /mnt/NMRData/NEO400/data
+NEO400b     NEO400      nmr         /opt/nmrdata/nmr         /home/nmruser/NEO400_Backup         /mnt/NMRData/NEO400
+DMX500      DMX500      nmrsu       /opt/xwinnmr/data        /home/nmruser/DMX500_Backup         /mnt/NMRData/DMX500   
