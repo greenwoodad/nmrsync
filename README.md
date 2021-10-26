@@ -25,8 +25,7 @@ There is an option to perform a second rsync to a second local location by speci
 path in the input file. This rsync is performed with different customizable options copying permissions, modification times, 
 or group information which enables (at least on my system) copying to a mounted windows file share.
 
-I run this as a cron job every five minutes as well as every week with a second input file to  
-ensure data is still eventually transferred after network or power outages. 
+I run this as a cron job every five minutes as well as every week with a second input file to ensure data is still eventually transferred after network or power outages. 
 
 ## Prerequisites
 
@@ -103,21 +102,30 @@ automatically without manual password entry.
 In the input file (nmrsync_input) there are a number of parameters and paths to set:
 
 *'ScriptsPath': Location of the main script and the input, emailtxt, and log folders on local machine.
+
 *'SendmailPath': Location of the sendmail application on local machine, probably /usr/sbin.
+
 *'ManagerEmail': Email address of the NMR facility manager.
+
 *'FastMode': y or n-- y to run in "fast" mode looking for experiments run recently (e.g. within ~60 min) .
+
 *'AgeDay': Used in "slow" mode, how many days back to look for recent experiments to sync.
+
 *'AgeMin': Used in "fast" mode, how many minutes back to look for recent experiments to sync.
+
 *'Instrument': Name of instrument. Can be anything (no spaces) but make sure it is unique (not entered twice in the table). 
+
 *'SSHAlias': Alias for password-less SSH to this instrument computer.
+
 *'RemoteUser': User on the remote computer that you can SSH as.
+
 *'RemoteDataPath': Path containing NMR data on the remote comupter. Topspin/ICON-NMR usernames should be found in this folder.
+
 *'LocalDataPath': Path on local computer to transfer the data to. 
+
 *'MountedPath': (optional) A second path on the local computer to transfer data to. This can be an external hard drive or a windows file share, for instance. (There's no requirement that this actually refer to a mounted file system but it should be local.)
 
 IMPORTANT: When editing this file, do not use entries that contain spaces. 
-
-IMPORTANT: When editing this file, make sure there are always at least two spaces separating entries for proper parsing of the input file.
 
 Multiple input files can be prepared to run nmrsync in different configurations. 
 
