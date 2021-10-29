@@ -125,6 +125,7 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 * `MountedPath`: (optional) A second path on the local computer to transfer data to. This can be an external hard drive or a windows file share, for instance. (There's no requirement that this actually refer to a mounted file system but it should be local.)
 
+
 IMPORTANT: When editing this file, do not use entries that contain spaces. 
 
 Multiple input files can be prepared to run nmrsync in different configurations. 
@@ -156,8 +157,10 @@ Options
 
 To run this as a cron job, make an entry in your crontab like this:
 
+```sh
 */5 * * * * /path/to/nmrsync "/path/to/input/nmrsync_input"
 40 6 * * 0 /path/to/nmrsync "/path/to/input/nmrsync_input_weekly"
+```
 
 In the preceding example, there is a second input file which is configured to run in "slow" mode, looking for data that has been collected over the last week. The "fast" version is set to run every five minutes (*/5) while the "slow" version is set to run on Sunday (0) at 6:40 AM (40 6).
 
