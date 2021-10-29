@@ -309,6 +309,10 @@ fi
 
 parse_input $Input #function above
 
+#Make the LogPath if it doesn't exist
+
+mkdir -p "$LogPath"
+
 #Get the rsync protocol version on the local machine
 RsyncVer=$(rsync --version | grep -o "protocol version.*" | cut -d ' ' -f 3)
 
