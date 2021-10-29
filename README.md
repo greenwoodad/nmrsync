@@ -50,7 +50,7 @@ are available here:
 * [OpenSSH Config File Examples](https://www.cyberciti.biz/faq/create-ssh-config-file-on-linux-unix/)
 
 Briefly: 
-1) On the machine you want to run the script and copy data to (as the user you want to do this as) run the command:
+1) On the machine you want to run the script and send emails from (as the user you want to do this as) run the command:
 
 ```sh
 ssh-keygen -t rsa -b 4096
@@ -60,7 +60,7 @@ This will generate files ~/.ssh/id_rsa and ~/.ssh/id_rsa.pub
 
 Press enter at the prompt "Enter passphrase (empty for no passphrase):" to skip passphrase generation.
 
-2) Next, run this command for each remote workstation:
+2) Next, run this command (from the local machine) for each remote workstation:
 
 ```sh
 ssh-copy-id remote_username@remote_ip_address
@@ -75,27 +75,37 @@ cat ~/.ssh/id_rsa.pub | ssh remote_username@remote_ip_address "mkdir -p ~/.ssh &
 
 3) Last, add SSH aliases to your hosts file. In /etc/hosts, add entries:
 
+```sh
 IPAddress DomainName SSHAlias
+```
 
 for each remote workstation.
 
 for example:
+```sh
 198.51.100.50     dmx500.chem.university.edu       DMX500
 198.51.100.54     av400.chem.university.edu        AV400
 198.51.100.59     neo400.chem.university.edu       NEO400
-
+```
 The SSHAliases here should be the same SSHAliases you enter in the input file. 
 
 You should now be able to SSH to the remote workstations without entering a password by typing: 
 
 ```sh
-ssh SSHAlias
+ssh remote_username@SSHAlias
 ```
+
+in addition to 
+
+ssh remote_username@IPAddress 
+
+and
+
+ssh remote_username@DomainName 
 
 The first time you do this, you will need to type "yes" to the question "Are you sure you want
 to continue connecting (yes/no)?" however. After this, you will be able to run the script 
 automatically without manual password entry.
-
 
 ### Configuring the input file
 
