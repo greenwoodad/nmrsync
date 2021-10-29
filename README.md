@@ -5,7 +5,7 @@ using [rsync](https://download.samba.org/pub/rsync/rsync.html). It takes an inpu
 an argument which provides information including paths, SSH aliases, and settings regarding 
 how frequenty the rsync is to be performed. The script searches for files that have been 
 modified recently (< x min or days old, specified in the input file), searching in folders 
-up to the level of $RemoteDataPath/*/nmr/*. For example, if a new spectrum 1/ or 2/ appears 
+up to the level of $RemoteDataPath/user/nmr/experiment. For example, if a new spectrum 1/ or 2/ appears 
 in an experiment folder, the experiment is flagged for syncing, but if something deeper (e.g. 
 a proc file in a pdata folder) is changed, it won't be flagged. 
 
@@ -25,7 +25,7 @@ There is an option to perform a second rsync to a second local location by speci
 path in the input file. This rsync is performed with different customizable options copying permissions, modification times, 
 or group information which enables (at least on my system) copying to a mounted windows file share.
 
-I run this as a cron job every five minutes as well as every week with a second input file to ensure data is still eventually transferred after network or power outages. 
+I personally run this as a cron job every five minutes as well as every week with a second input file to ensure data is still eventually transferred after network or power outages. 
 
 ## Prerequisites
 
