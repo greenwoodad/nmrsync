@@ -1,4 +1,4 @@
-ScriptsPath             /home/nmr/iconcheck             #Location of the main script and the input, emailtxt, and log folders on local machine
+ScriptsPath             /home/nmr/nmrsync               #Location of the main script and the input, emailtxt, and log folders on local machine
 SendmailPath            /usr/sbin                       #Location of the sendmail application on local machine
 ManagerEmail            nmrmgr@mail.university.edu      #Email address of NMR facility manager
 FastMode                y                               #y or n-- y to run in "fast" mode looking for experiments run recently (e.g. within ~60 min)   
