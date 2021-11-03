@@ -37,7 +37,19 @@ The email feature requires that the command *sendmail* is working on the machine
 
 ## Installing
 
+```sh
 git clone https://github.com/greenwoodad/nmrsync
+```
+or 
+
+```sh
+git clone https://(your github username)@github.com/greenwoodad/nmrsyc.git
+```
+
+followed by:
+```sh
+chmod +x ./nmrsync/nmrsync
+```
 
 ## Getting Started
 
@@ -97,12 +109,14 @@ ssh remote_username@SSHAlias
 
 in addition to 
 
+```sh
 ssh remote_username@IPAddress 
-
+```
 and
 
+```sh
 ssh remote_username@DomainName 
-
+```
 The first time you do this, you will need to type "yes" to the question "Are you sure you want
 to continue connecting (yes/no)?" however. After this, you will be able to run the script 
 automatically without manual password entry.
