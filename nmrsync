@@ -2,11 +2,7 @@
 
 # nmrsync
 #
-# Copyright 2021 Alex Greenwood
-#
-# This program is free software...
-#
-# This program is distributed with NO WARRANTY...
+# Copyright 2021 University of Cincinnati
 #
 # This program is meant to be run as a cron job to regularly copy (using rsync) recent NMR experiments to a
 # data server. It takes an input file as an argument which provides information including paths,
@@ -29,8 +25,6 @@
 #
 
 set -u
-#set -Ee
-#trap "Send_Email greenwa2@ucmail.uc.edu emailtxt_scriptissue scripterror" ERR
 
 ##default parameter/flag settings -- change these if you wish
 
@@ -40,7 +34,7 @@ ManualFlag="n" #specifies whether to manually input passwords for SSH
 ExcludeFlag="y" #specifies whether the instrument-specific exclude file is used or not
 FullFlag="n" #specifies whether to sync the whole file structure or just new files
 RsyncAdd1="-a" #additional rsync options for the first sync
-RsyncAdd2="-lD" #see what happens here #additional rsync options for the second sync
+RsyncAdd2="-lD" #additional rsync options for the second sync
 
 ##functions
 
