@@ -48,7 +48,11 @@ function Show_Usage() {
 	echo ""
 	echo " -i, --input                              Set input file (flag optional)."
         echo ""
-	echo " -m, --manual (default n)                 Set to  to operate in manual mode (enter password "
+	echo " -s, --skip (default 'both')              Set to 'period' to skip folders ending in period, "
+	echo "                                          'dup' to skip case-insensitive duplicates, 'both' "
+	echo "                                          to skip both and 'none' to skip none."
+        echo ""
+	echo " -m, --manual (default n)                 Set to y to operate in manual mode (enter password "
 	echo "                                          instead of using SSH keys--not recommended)."
         echo ""
 	echo " -e, --excludelist (default y)            Set to n to not utilize instrument-specific exclude "
@@ -203,13 +207,13 @@ function make_skipfile () {
 
 	>"$SkipFileNew"	#if file doesn't exist
 	
-	if [[ "$SkipFlag"!="period" ]]; then
+	if [[ "$SkipFlag" != "period" ]]; then
 		#generate a list of duplicate file names on $Instrument differing only in case
 		"${SSH_cmd[@]}" "cd $RemoteDataPath; find $RemoteDataPath/*/nmr/ -maxdepth 1 -name .svn -type d -prune -false -o -print | perl -ne "		\
 		\''push @{$f{lc($_)}}, $_; END{map{print @{$f{$_}}} grep {@{$f{$_}}>1} sort keys %f}'\' | cat > "$SkipFileNew"
 	fi
 	
-	if [[ "$SkipFlag"!="dup" ]]; then
+	if [[ "$SkipFlag" != "dup" ]]; then
 	#add to the list any file names that end in a period
 		"${SSH_cmd[@]}" "cd $RemoteDataPath; find $RemoteDataPath/*/nmr/*. -maxdepth 0 -type d 2> /dev/null" | cat >> "$SkipFileNew"
 	fi
@@ -261,7 +265,7 @@ function make_syncfile () {
 	sed -i '1!G;h;$!d' "$SyncFileCurrent" #reverse order of $SyncFileCurrent
 	sed -i '/^$/d' "$SyncFileCurrent" # remove empty lines from $SyncFileCurrent
 
-	if [[ "$SkipFlag"!="none" ]]; then		
+	if [[ "$SkipFlag" != "none" ]]; then		
 		grep -v -x -f "$SkipFileOld" "$SyncFileCurrent" > "$SyncFile" # remove from syncfile lines present in skipfile	
 		mv "$SyncFile" $SyncFileCurrent #remove synclist.$Instrument" from log folder
 	else
