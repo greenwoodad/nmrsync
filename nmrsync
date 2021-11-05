@@ -218,7 +218,7 @@ function make_skipfile () {
 	sed -e "s^$RemoteDataPath^^g" -i "$SkipFileNew"
 	sed -e 's/^\///' -i "$SkipFileNew" 
 	
-	#check if contents are the same in old and new SKIPFILEs, if not, send an email alerting NMR Manager
+	#check if contents are the same in old and new skipfiles, if not, send an email alerting NMR Manager
 	touch "$SkipFileOld" # in case the file does not exist
 	if ! cmp -s "$SkipFileNew" "$SkipFileOld"; then
  		cp "$SkipFileNew" "$SkipFileOld" #Replace old skipfile with new one
@@ -228,7 +228,7 @@ function make_skipfile () {
 		fi
 	fi
 
-	#remove the new SKIPFILE since we just need one, $SkipFileOld
+	#remove the new SkipFileNew since we just need one, $SkipFileOld
 	rm "$SkipFileNew"
 }
 
