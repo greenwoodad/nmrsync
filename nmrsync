@@ -205,8 +205,6 @@ function get_instrumentinput () {
 #This function generates a skipfile containing names of spectra to not skip
 function make_skipfile () {
 
-	>"$SkipFileNew"	#if file doesn't exist
-	
 	if [[ "$SkipFlag" != "period" ]]; then
 		#generate a list of duplicate file names on $Instrument differing only in case
 		"${SSH_cmd[@]}" "cd $RemoteDataPath; find $RemoteDataPath/*/nmr/ -maxdepth 1 -name .svn -type d -prune -false -o -print | perl -ne "		\
@@ -328,7 +326,8 @@ while IFS= read -r -u10 Instrument ; do
 	else
 		SSH_cmd=(ssh "$RemoteUser@$SSHAlias")
 	fi
-        	
+        
+	>"$SkipFileNew"	#if file doesn't exist
 	if [[ "$SkipFlag" != "none" ]]; then	
 		#make the skipfile
 		make_skipfile	#function above
