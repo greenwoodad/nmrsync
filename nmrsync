@@ -429,7 +429,7 @@ while IFS= read -r -u10 Instrument ; do
 			rsync "${Rsync_Options_2[@]}" "$LocalDataPath/" "$MountedPath/"
 		fi
 		
-		if [[ test -f "$SyncFileCurrent" ]]; then
+		if [[ -f "$SyncFileCurrent" ]]; then
 			rm "$SyncFileCurrent" "$SyncFileOld"  #remove synclist.Instrument.current" from log folder
 		fi
 		
