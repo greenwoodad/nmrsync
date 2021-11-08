@@ -430,7 +430,7 @@ while IFS= read -r -u10 Instrument ; do
 		fi
 		
 		if [[ -f "$SyncFileCurrent" ]]; then
-			rm "$SyncFileCurrent" "$SyncFileOld"  #remove synclist.Instrument.current" from log folder
+			mv "$SyncFileCurrent" "$SyncFileOld"  #remove synclist.Instrument.current" from log folder
 		fi
 		
 		if [ $ManualFlag == 'y' ]; then
