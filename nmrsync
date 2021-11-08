@@ -223,8 +223,14 @@ function get_instrumentinput () {
 	#but by default contains filenames of processed data (1i 1r etc)
 
 	#If there's no instrument-specific excludelist, make one using the default file
-	if ! [[ -f "$ExcludeList" ]]; then
-		cp "$InputPath/excludelist" "$ExcludeList"
+	if [[ ! -f "$ExcludeList" && "$ExcludeFlag" == 'y' ]]; then
+		if ! [[ -f "$InputPath/excludelist" ]]; then
+			cp "$InputPath/excludelist" "$ExcludeList"
+			echo "Using default $InputPath/excludelist and copying to $ExcludeList."
+		else
+			echo "$ExcludeList and $InputPath/excludelist are both missing! Exiting."
+			exit 1
+		fi
 	fi
 
 }
