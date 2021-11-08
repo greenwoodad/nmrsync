@@ -143,9 +143,9 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 * `RemoteUser`: User on the remote computer that you can SSH as.
 
-* `RemoteDataPath`: Path containing NMR data on the remote comupter. Topspin/ICON-NMR usernames should be found in this folder.
+* `RemoteDataPath`: Full path containing NMR data on the remote comupter. Topspin/ICON-NMR usernames should be found in this folder.
 
-* `LocalDataPath`: Path on local computer to transfer the data to. 
+* `LocalDataPath`: Full path on local computer to transfer the data to. 
 
 * `MountedPath`: (optional) A second path on the local computer to transfer data to. This can be an external hard drive or a windows file share, for instance. (There's no requirement that this actually refer to a mounted file system but it should be local.)
 
