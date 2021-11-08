@@ -85,18 +85,42 @@ while [[ ! -z "${1-}" ]] ; do
 		-s|--skip)
 			shift
 			SkipFlag="$1"
+			if ! [[ "$SkipFlag" == 'dup' || "$SkipFlag" == 'period' || "$SkipFlag" == 'both' || "$SkipFlag" == 'none' ]]
+				echo "Invalid skip option."
+				echo ""
+				Show_Usage
+				exit 1
+			fi
 			;;
 		-m|--manual)
 			shift
 			ManualFlag="$1"
+			if ! [[ "$ManualFlag" == 'y' || "$ManualFlag" == 'n' ]]
+				echo "Invalid manual option."
+				echo ""
+				Show_Usage
+				exit 1
+			fi
 			;;
 		-e|--excludelist)
 			shift
 			ExcludeFlag="$1"
+			if ! [[ "$ExcludeFlag" == 'y' || "$ExcludeFlag" == 'n' ]]
+				echo "Invalid exclude option."
+				echo ""
+				Show_Usage
+				exit 1
+			fi		
 			;;
 		-f|--full)
 			shift
 			FullFlag="$1"
+			if ! [[ "$FullFlag" == 'y' || "$FullFlag" == 'n' ]]
+				echo "Invalid full option."
+				echo ""
+				Show_Usage
+				exit 1
+			fi
 			;;
 		-ra1|--rsync_add_1)
 			shift
@@ -327,7 +351,7 @@ while IFS= read -r -u10 Instrument ; do
 		SSH_cmd=(ssh "$RemoteUser@$SSHAlias")
 	fi
         
-	>"$SkipFileNew"	#if file doesn't exist
+	>"$SkipFileNew"	#empty skipfile
 	if [[ "$SkipFlag" != "none" ]]; then	
 		#make the skipfile
 		make_skipfile	#function above
