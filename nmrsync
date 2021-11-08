@@ -61,9 +61,11 @@ function Show_Usage() {
 	echo " -f, --full (default n)                   Set to y to copy over all data instead of just "
 	echo "                                          recently added data."
         echo ""
-	echo " -ra1, --rsync_add_1 (default '-a')       Provide additional options for the first rsync "
+	echo " -ra1, --rsync_add_1 (default 'a')       Provide additional options for the first rsync "
+	echo "                                         (for example, -ra1 avz)"
         echo ""
-	echo " -ra2, --rsync_add_2 (default '-rlD')     Provide additional options for the second rsync "
+	echo " -ra2, --rsync_add_2 (default 'rlD')     Provide additional options for the second rsync "
+	echo "                                         (for example, -ra2 avz)"
         echo ""
 	echo "For more information, please see the README file:"
 	echo "https://github.com/greenwoodad/nmrsync/README.md"
@@ -124,11 +126,11 @@ while [[ ! -z "${1-}" ]] ; do
 			;;
 		-ra1|--rsync_add_1)
 			shift
-			RsyncAdd1="$1"
+			RsyncAdd1="-$1"
 			;;
 		-ra2|--rsync_add_2)
 			shift
-			RsyncAdd2="$1"
+			RsyncAdd2="-$1"
 			;;			
 		-*)
 			echo "Unknown option: \"$1\""
