@@ -28,7 +28,7 @@ set -u
 
 ##default parameter/flag settings -- change these if you wish
 
-Rsync_Options="-vr --protect-args --update" #default options that all rsync operations use 
+Rsync_Options="-uvr --protect-args" #default options that all rsync operations use 
 SkipFlag="both" #specifies what files are skipped (ending in a period, capitalization-insensitive duplicates, both, or neither)
 ManualFlag="n" #specifies whether to manually input passwords for SSH
 ExcludeFlag="y" #specifies whether the instrument-specific exclude file is used or not
