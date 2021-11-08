@@ -224,7 +224,7 @@ function get_instrumentinput () {
 
 	#If there's no instrument-specific excludelist, make one using the default file
 	if [[ ! -f "$ExcludeList" && "$ExcludeFlag" == 'y' ]]; then
-		if ! [[ -f "$InputPath/excludelist" ]]; then
+		if [[ -f "$InputPath/excludelist" ]]; then
 			cp "$InputPath/excludelist" "$ExcludeList"
 			echo "Using default $InputPath/excludelist and copying to $ExcludeList."
 		else
