@@ -5,19 +5,19 @@ using [rsync](https://download.samba.org/pub/rsync/rsync.html). It takes an inpu
 an argument which provides information including paths, SSH aliases, and settings regarding 
 how frequenty the rsync is to be performed. The script searches for files that have been 
 modified recently (< x min or days old, specified in the input file), searching in folders 
-up to the level of $RemoteDataPath/user/nmr/experiment. For example, if a new spectrum 1/ or 2/ appears 
+up to the level of RemoteDataPath/user/nmr/experiment. For example, if a new spectrum 1/ or 2/ appears 
 in an experiment folder, the experiment is flagged for syncing, but if something deeper (e.g. 
 a proc file in a pdata folder) is changed, it won't be flagged. 
 
 It operates in two modes, "fast" and "slow," to be specified in the input file. In the "fast" 
-mode it maintains the 5 most recent spectra in a list ("$SyncFileOld") and continues to sync 
+mode it maintains the 5 most recent spectra in a list ("SyncFileOld") and continues to sync 
 these until they are displaced by newer spectra -- this allows for syncing of spectra that take 
-longer than $AgeMin to acquire and are therefore not "new" by the time the spectrum is done. 
+longer than AgeMin to acquire and are therefore not "new" by the time the spectrum is done. 
 
 Before syncing, the script can search for folders that are identically named except for case 
 differences (which are unique in Linux but indistinguisable on Windows and Mac), as well as for 
 folders that end in a period (which is permissible on Linux and Mac but not on Windows). The 
-names of these spectra are then placed in $SkipFileOld and they are not synced. An email is 
+names of these spectra are then placed in SkipFileOld and they are not synced. An email is 
 instead sent to the NMR manager who can then manually change the folder names once the data 
 has finished acquiring. 
 
