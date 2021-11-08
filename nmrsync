@@ -325,7 +325,7 @@ parse_flags "$@" #function above
 if [[ "${Input-}" != "" && -f "${Input-}" ]]; then
     echo "Input file is $Input."
 else
-    echo "No valid input file ($Input not provided or does not exist)."
+    echo "No valid input file ("${Input-}" not provided or does not exist)."
     echo ""
     Show_Usage
     exit 1
