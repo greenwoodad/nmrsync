@@ -8,19 +8,19 @@
 # data server. It takes an input file as an argument which provides information including paths,
 # SSH aliases, and settings related to how frequenty the rsync is to be performed. The script searches 
 # for files that have been modified recently (< x min or days old, depending on the input file), searching
-# in folders up to the level of $RemoteDataPath/*/nmr/*. For example, if a new spectrum 1/ or 2/ appears  
+# in folders up to the level of RemoteDataPath/user/nmr/*. For example, if a new spectrum 1/ or 2/ appears  
 # in the experiment folder, the experiment is flagged for syncing, but if something deeper (e.g. a proc 
 # file in a pdata folder) is changed, it won't be flagged. 
 # 
 # It operates in two modes, "fast" and "slow," to be specified in the input file. In the "fast" mode it 
-# maintains the 5 most recent spectra in a list ("$SyncFileOld") and continues to sync these until they
-# are displaced by newer spectra -- this allows for syncing of spectra that take longer than $AgeMin to
+# maintains the 5 most recent spectra in a list ("SyncFileOld") and continues to sync these until they
+# are displaced by newer spectra -- this allows for syncing of spectra that take longer than AgeMin to
 # acquire and are therefore not "new" by the time the spectrum is done. Before syncing, the script 
 # searches for folders that are identically named except for case differences (which are unique in Linux
 # but indistinguisable on Windows and Mac), as well as for folders that end in a period (which is
-# permissible on Linux and Mac but not on Windows). These spectra are then placed in $SkipFileOld which 
-# is not synced. An email is instead sent to the NMR manager who can then manually change the folder names
-# once the data has finished acquiring. 
+# permissible on Linux and Mac but not on Windows). The names of these folders are listed in SkipFileOld 
+# and they are not synced. An email is instead sent to the NMR manager who can then manually change the 
+# folder names once the data has finished acquiring. 
 #
 #
 
@@ -29,8 +29,8 @@ set -u
 ##default parameter/flag settings -- change these if you wish
 
 Rsync_Options="-uvr --protect-args" #default options that all rsync operations use 
-SkipFlag="both" #specifies what files are skipped (ending in a period, capitalization-insensitive duplicates, both, or neither)
-ManualFlag="n" #specifies whether to manually input passwords for SSH
+SkipFlag="both" #specifies what folders are skipped --ending in a period ('period'), capitalization-insensitive duplicates ('dup'), 'both', or 'none'
+ManualFlag="n" #specifies whether to manually input passwords for SSH -- use 'y' if you don't have password-less SSH set up to avoid entering password more than once
 ExcludeFlag="y" #specifies whether the instrument-specific exclude file is used or not
 FullFlag="n" #specifies whether to sync the whole file structure or just new files
 RsyncAdd1="-a" #additional rsync options for the first sync
@@ -55,17 +55,17 @@ function Show_Usage() {
 	echo " -m, --manual (default n)                 Set to y to operate in manual mode (enter password "
 	echo "                                          instead of using SSH keys--not recommended)."
         echo ""
-	echo " -e, --excludelist (default y)            Set to n to not utilize instrument-specific exclude "
-	echo "                                          list in the input folder (will copy processed data)."
+	echo " -e, --excludelist (default y)            Set to n to not utilize excludelist.instrument "
+	echo "                                          in the input folder (will copy processed data)."
         echo ""
 	echo " -f, --full (default n)                   Set to y to copy over all data instead of just "
 	echo "                                          recently added data."
         echo ""
-	echo " -ra1, --rsync_add_1 (default 'a')       Provide additional options for the first rsync "
-	echo "                                         (for example, -ra1 avz)"
+	echo " -ra1, --rsync_add_1 (default 'a')        Provide additional options for the first rsync "
+	echo "                                          (for example, -ra1 avz)"
         echo ""
-	echo " -ra2, --rsync_add_2 (default 'rlD')     Provide additional options for the second rsync "
-	echo "                                         (for example, -ra2 avz)"
+	echo " -ra2, --rsync_add_2 (default 'rlD')      Provide additional options for the second rsync "
+	echo "                                          (for example, -ra2 avz)"
         echo ""
 	echo "For more information, please see the README file:"
 	echo "https://github.com/greenwoodad/nmrsync/README.md"
@@ -169,7 +169,7 @@ function parse_input () {
 	while IFS=$'\t' read -r column1 column2 column3 column4 column5 column6; do 
 		Instrument_Array="$Instrument_Array"$'\n'${column1}
 	done < <(echo "${Input}")
-	Instrument_Array=$(echo "${Instrument_Array}"| tail -n +11 | 	sed '/^#/d' | sed '/^$/d') #read list of instruments, skipping lines that start with #
+	Instrument_Array=$(echo "${Instrument_Array}"| tail -n +11 | sed '/^#/d' | sed '/^$/d') #read list of instruments, skipping lines that start with #
 
 	#extract out instrument-independent parameters from top 6 lines of input file
 	ManagerEmail=$(grep -w '^ManagerEmail' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #NMR manager's email address
@@ -202,12 +202,13 @@ function parse_input () {
 #This function parses the instrument-specific lines in the input file.
 function get_instrumentinput () {
 
-	#Get paths and other variables from $Input
-	SSHAlias=$(grep -w "^$Instrument" <<< "$Input" | cut -f 2 ) #SSH alias for instrument 
-	RemoteUser=$(grep -w "^$Instrument" <<< "$Input" | cut -f 3 ) #Remote user you will be SSHing to instrument computer as	
-	RemoteDataPath=$(grep -w "^$Instrument" <<< "$Input" | cut -f 4 ) #Top directory of data file structure on the remote machine
-	LocalDataPath=$(grep -w "^$Instrument" <<< "$Input" | cut -f 5 ) #Top directory of data file structure on the local machine
-	MountedPath=$(grep -w "^$Instrument" <<< "$Input" | cut -f 6 ) #Top directory of mounted file structure (windows machine, external drive), if used
+	#Get paths and other variables from Input
+	InstrumentLine=$(grep -w "^$Instrument" <<< "$Input" ) #Instrument line in input file
+	SSHAlias=$(echo "$InstrumentLine" | cut -f 2 ) #SSH alias for instrument 
+	RemoteUser=$(echo "$InstrumentLine" | cut -f 3 ) #Remote user you will be SSHing to instrument computer as	
+	RemoteDataPath=$(echo "$InstrumentLine" | cut -f 4 ) #Top directory of data file structure on the remote machine
+	LocalDataPath=$(echo "$InstrumentLine" | cut -f 5 ) #Top directory of data file structure on the local machine
+	MountedPath=$(echo "$InstrumentLine" | cut -f 6 ) #Top directory of mounted file structure (windows machine, external drive), if used
 	
 	#Exit if there aren't at least 5 entries in the Instrument line in $Input
 	[[ -z "$LocalDataPath" ]] && { echo "LocalDataPath is empty" ; exit 1; }
@@ -251,7 +252,8 @@ function make_skipfile () {
 	if ! cmp -s "$SkipFileNew" "$SkipFileOld"; then
  		cp "$SkipFileNew" "$SkipFileOld" #Replace old skipfile with new one
 		SkipFileContents=$(cat $SkipFileNew)
-		if ! [[ $SkipFileContents == "" ]]; then #don't bother if the current SKIPFILE is empty
+		if ! [[ $SkipFileContents == "" ]]; then #don't bother if the current SkipFile is empty
+			echo "Some spectra not synced: $SkipFileContents"
 			Send_Email "$ManagerEmail" "emailtxt_skips" "Duplicate or *. folder name"
 		fi
 	fi
