@@ -149,10 +149,12 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 * `MountedPath`: (optional) A second path on the local computer to transfer data to. This can be an external hard drive or a windows file share, for instance. (There's no requirement that this actually refer to a mounted file system but it should be local.)
 
-
 IMPORTANT: When editing this file, do not use entries that contain spaces. 
 
 Multiple input files can be prepared to run nmrsync in different configurations. 
+
+
+NOTE: Additional modifications can be made to the top of the script itself, especially to the Rsync_Options variable. By default this is set to '-uvr --protect-args' with RsyncAdd1 set to '-a' and RsyncAdd2 set to ''.
 
 ## Usage
 
@@ -182,6 +184,8 @@ Options
 -ra1, --rsync_add_1 (default '-a')       Provide additional options for the first rsync.
 
 -ra2, --rsync_add_2 (default '-rlD')     Provide additional options for the second rsync. 
+
+The defaults here can be modified at the top of the script itself.
 
 To run this as a cron job, make an entry in your crontab like this:
 
