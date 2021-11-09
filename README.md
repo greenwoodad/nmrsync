@@ -181,9 +181,11 @@ Options
 -f, --full (default n)                   Set to y to copy over all data instead of just 
                                          recently added data."
 										 
--ra1, --rsync_add_1 (default '-a')       Provide additional options for the first rsync.
+-ra1, --rsync_add_1 (default '-a')       Provide additional options for the first rsync (for
+					 example, -ra1 avz).
 
--ra2, --rsync_add_2 (default '-rlD')     Provide additional options for the second rsync. 
+-ra2, --rsync_add_2 (default '')         Provide additional options for the second rsync (for
+					 example, -ra2 avz). 
 
 The defaults here can be modified at the top of the script itself.
 
