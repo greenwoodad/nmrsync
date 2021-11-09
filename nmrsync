@@ -28,13 +28,13 @@ set -u
 
 ##default parameter/flag settings -- change these if you wish
 
-Rsync_Options="-uvr --protect-args" #default options that all rsync operations use 
+Rsync_Options="-uvrlD --protect-args" #default options that all rsync operations use 
 SkipFlag="both" #specifies what folders are skipped --ending in a period ('period'), capitalization-insensitive duplicates ('dup'), 'both', or 'none'
 ManualFlag="n" #specifies whether to manually input passwords for SSH -- use 'y' if you don't have password-less SSH set up to avoid entering password more than once
 ExcludeFlag="y" #specifies whether the instrument-specific exclude file is used or not
 FullFlag="n" #specifies whether to sync the whole file structure or just new files
 RsyncAdd1="-a" #additional rsync options for the first sync
-RsyncAdd2="-lD" #additional rsync options for the second sync
+RsyncAdd2="" #additional rsync options for the second sync
 
 ##functions
 
@@ -64,7 +64,7 @@ function Show_Usage() {
 	echo " -ra1, --rsync_add_1 (default 'a')        Provide additional options for the first rsync "
 	echo "                                          (for example, -ra1 avz)"
         echo ""
-	echo " -ra2, --rsync_add_2 (default 'rlD')      Provide additional options for the second rsync "
+	echo " -ra2, --rsync_add_2 (default '')      Provide additional options for the second rsync "
 	echo "                                          (for example, -ra2 avz)"
         echo ""
 	echo "For more information, please see the README file:"
