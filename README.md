@@ -5,12 +5,12 @@ using [rsync](https://download.samba.org/pub/rsync/rsync.html). It takes an inpu
 as an argument which provides information including paths, SSH aliases, and rsync 
 options. The script searches for files that have been modified recently (< x days as 
 specified in the input file), searching in folders up to the level of 
-RemoteDataPath/user/nmr/experiment. For example, if a new spectrum 1/ or 2/ appears in
-the experiment folder, the experiment is flagged for syncing, but if something deeper 
+RemoteDataPath/<user>/nmr/<data set>. For example, if a new spectrum 1/ or 2/ appears in
+the data set folder, the data set is flagged for syncing, but if something deeper 
 (e.g. a proc file in a pdata folder) is changed, it won't be flagged.  
 
 Before syncing, the script can search for folders that are identically named except for 
-case differences (which are unique in Linux but indistinguisable on Windows and Mac), as
+case differences (which are unique in Linux but indistinguishable on Windows and Mac), as
 well as for folders that end in a period (which is permissible on Linux and Mac but not 
 on Windows). The names of these spectra are then placed in SkipFileOld and they are not 
 synced. An email is instead sent to the NMR manager who can then manually change the 
