@@ -131,13 +131,13 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 * `ManagerEmail`: Email address of the NMR facility manager.
 
-* `AgeDay`: How many days back to look for recent experiments to sync. Default is 3, which works well unless you run spectra that take longer than 3 days to acquire
+* `AgeDay`: How many days back to look for recent experiments to sync. Default is 3, which works well unless you run spectra that take longer than 3 days to acquire.
 
 * `RsyncOptions_1`: Rsync options for first rsync. Default is '-auvr --protect-args'
 
 * `RsyncOptions_2`: Rsync options for second rsync (optional). Default is '-uvrlD --protect-args' 
 
-* `SkipFlag`: Defines what folders are not synced. 'period' to skip folders ending in a period, 'dup' to skip folders with case-insensitive duplicates, 'both,' or 'none.'. Default is 'both.' Note that if a different value of SkipFlag is specified with -s when the script is run, it overrules the value specified in the input file.			
+* `SkipFlag`: Defines what folders are not synced. 'period' to skip folders ending in a period, 'dup' to skip folders with case-insensitive duplicates, 'both,' or 'none.' Default is 'both.' Note that if a different value of SkipFlag is specified with -s when the script is run, it overrules the value specified in the input file.			
 
 * `Instrument`: Name of instrument. Can be anything (no spaces) but make sure it is unique (not entered twice in the table). 
 
