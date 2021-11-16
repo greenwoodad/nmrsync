@@ -359,9 +359,9 @@ while IFS= read -r -u10 Instrument ; do
 		RemoteRsyncVer=$("${SSH_cmd[@]}" "rsync --version | grep -o 'protocol version.*' | cut -d ' ' -f 3")
 
 		if [[ "$RsyncVer" -gt "$RemoteRsyncVer" ]]; then
-				Ver="$RemoteRsyncVer"  #version to actually use
+			Ver="$RemoteRsyncVer"  #version to actually use
 		else
-				Ver="$RsyncVer"		  #version to actually use		
+			Ver="$RsyncVer"		  #version to actually use		
 		fi
 		
 		RsyncOptions_0=(--protocol="$Ver") #first rsync option 
