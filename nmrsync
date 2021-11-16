@@ -12,7 +12,7 @@
 # syncing, but if something deeper (e.g. a proc file in a pdata folder) is changed, it won't be flagged. 
 # 
 # Before syncing, the script searches for folders that are identically named except for case differences 
-# (which are unique in Linux but indistinguisable on Windows and Mac), as well as for folders that end in 
+# (which are unique in Linux but indistinguishable on Windows and Mac), as well as for folders that end in 
 # a period (which is permissible on Linux and Mac but not on Windows). The names of these folders are 
 # listed in SkipFileOld and they are not synced. An email is instead sent to the NMR manager who can then
 # manually change the folder names once the data has finished acquiring. This can also be accomplished
