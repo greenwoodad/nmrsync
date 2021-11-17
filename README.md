@@ -5,7 +5,7 @@ using [rsync](https://download.samba.org/pub/rsync/rsync.html). It takes an inpu
 as an argument which provides information including paths, SSH aliases, and rsync 
 options. The script searches for files that have been modified recently (< x days as 
 specified in the input file), searching in folders up to the level of 
-RemoteDataPath/<user>/nmr/<data set>. For example, if a new spectrum 1/ or 2/ appears in
+RemoteDataPath/(user)/nmr/(data set). For example, if a new spectrum 1/ or 2/ appears in
 the data set folder, the data set is flagged for syncing, but if something deeper 
 (e.g. a proc file in a pdata folder) is changed, it won't be flagged.  
 
@@ -145,7 +145,7 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 * `RemoteUser`: User on the remote computer that you can SSH as.
 	
-* `/nmr directory?`: Set this to 'y' for the default /<user>/nmr/<data set>/<expt #> data organization on the remote computer. Set it to 'n' for data organized as /<user>/<data set>/<expt #>
+* `/nmr directory?`: Set this to 'y' for the default /(user)/nmr/(data set)/(expt #) data organization on the remote computer. Set it to 'n' for data organized as /(user)/(data set)/(expt #)
 
 * `RemoteDataPath`: Full path containing NMR data on the remote comupter. Topspin/ICON-NMR usernames should be found in this folder.
 
