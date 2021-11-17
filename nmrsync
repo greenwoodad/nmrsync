@@ -147,7 +147,7 @@ function parse_input () {
 	while IFS=$'\t' read -r column1 column2 column3 column4 column5 column6; do 
 		Instrument_Array="$Instrument_Array"$'\n'${column1}
 	done < <(echo "${Input}")
-	Instrument_Array=$(echo "${Instrument_Array}"| sed -e '1,/Instrument/d' | tail -n +1 | sed '/^#/d' | sed '/^$/d') #read list of instruments, ski$		
+	Instrument_Array=$(echo "${Instrument_Array}"| sed -e '1,/Instrument/d' | tail -n +1 | sed '/^#/d' | sed '/^$/d') #read list of instruments, skipping lines that start with #		
 			
 	#extract out instrument-independent parameters from top 6 lines of input file
 	ManagerEmail=$(grep -w '^ManagerEmail' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #NMR manager's email address
