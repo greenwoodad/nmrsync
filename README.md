@@ -155,10 +155,10 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 IMPORTANT: When editing this file, entries should be separated by either a tab or multiple spaces. 
 
-Multiple input files can be prepared to run nmrsync in different configurations. 
+Instruments in the instrument table can be commented out with a #. 
 
 
-NOTE: Additional modifications can be made to the variables 'ManualFlag', 'ExcludeFlag', and 'FullFlag' at top of the script itself. These are the default values for options that can be provided when the script is run.
+NOTE: Additional modifications can be made to the variables 'ManualFlag', 'ExcludeFlag', and 'FullFlag' at top of the script itself. These are the default values for options that can be provided when the script is run (see Usage, below).
 
 ## Usage
 
