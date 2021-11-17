@@ -144,6 +144,8 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 * `SSHAlias`: Alias for password-less SSH to this instrument computer.
 
 * `RemoteUser`: User on the remote computer that you can SSH as.
+	
+* `/nmr directory?`: Set this to 'y' for the default /<user>/nmr/<data set>/<expt #> data organization on the remote computer. Set it to 'n' for data organized as /<user>/<data set>/<expt #>
 
 * `RemoteDataPath`: Full path containing NMR data on the remote comupter. Topspin/ICON-NMR usernames should be found in this folder.
 
@@ -151,7 +153,7 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 * `MountedPath`: (optional) A second path on the local computer to transfer data to. This can be an external hard drive or a mounted windows file share, for instance. (There's no requirement that this actually refer to a mounted file system but it should be local.)
 
-IMPORTANT: When editing this file, do not use entries that contain spaces. 
+IMPORTANT: When editing this file, entries should be separated by either a tab or multiple spaces. 
 
 Multiple input files can be prepared to run nmrsync in different configurations. 
 
@@ -174,7 +176,7 @@ Options
                                          'dup' to skip case-insensitive duplicates, 'both' 
                                          to skip both and 'none' to skip none.
 
--m, --manual (default n)                 Set to  to operate in manual mode (enter password 
+-m, --manual (default n)                 Set to y to operate in manual mode (enter password 
                                          instead of using SSH keys--not recommended).
 										 
 -e, --excludelist (default y)            Set to n to not utilize instrument-specific exclude 
