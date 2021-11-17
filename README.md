@@ -125,7 +125,7 @@ automatically without manual password entry.
 
 In the input file (nmrsync_input) there are a number of parameters and paths to set:
 
-* `ScriptsPath`: Location of the main script and the input, emailtxt, and log folders on local machine.
+* `ScriptsPath`: Full path to the location of the main script and the input, emailtxt, and log folders on local machine. Use full path!
 
 * `SendmailPath`: Location of the sendmail application on local machine, probably /usr/sbin.
 
