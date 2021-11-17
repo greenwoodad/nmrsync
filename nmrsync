@@ -7,8 +7,8 @@
 # This program is meant to be run as a cron job to regularly copy (using rsync) recent NMR experiments to
 # a data server. It takes an input file as an argument which provides information including paths,
 # SSH aliases, and rsync options. The script searches for files that have been modified recently (< x days 
-# as specified in the input file), searching in folders up to the level of RemoteDataPath/user/nmr/experiment.
-# For example, if a new spectrum 1/ or 2/ appears in the experiment folder, the experiment is flagged for 
+# as specified in the input file), searching in folders up to the level of RemoteDataPath/<user>/nmr/<data set>.
+# For example, if a new spectrum 1/ or 2/ appears in the data set folder, the experiment is flagged for 
 # syncing, but if something deeper (e.g. a proc file in a pdata folder) is changed, it won't be flagged. 
 # 
 # Before syncing, the script searches for folders that are identically named except for case differences 
@@ -147,8 +147,8 @@ function parse_input () {
 	while IFS=$'\t' read -r column1 column2 column3 column4 column5 column6; do 
 		Instrument_Array="$Instrument_Array"$'\n'${column1}
 	done < <(echo "${Input}")
-	Instrument_Array=$(echo "${Instrument_Array}"| sed -e '1,/Instrument/d' | tail -n +2 | sed '/^#/d' | sed '/^$/d') #read list of instruments, skipping lines tha$
-		
+	Instrument_Array=$(echo "${Instrument_Array}"| sed -e '1,/Instrument/d' | tail -n +1 | sed '/^#/d' | sed '/^$/d') #read list of instruments, ski$		
+			
 	#extract out instrument-independent parameters from top 6 lines of input file
 	ManagerEmail=$(grep -w '^ManagerEmail' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #NMR manager's email address
 	ScriptsPath=$(grep -w '^ScriptsPath' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #path containing log and input folders and probably this script 
@@ -157,9 +157,7 @@ function parse_input () {
 	AgeDay=$(grep -w '^AgeDay' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #How far back to look for recent spectra, in days
 	RsyncOptions_1=$(grep -w '^RsyncOptions_1' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) # Options for the first rsync
 	RsyncOptions_2=$(grep -w '^RsyncOptions_2' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) # Options for the second rsync
-	RsyncOptions_1=($RsyncOptions_1) # split into an array
-	RsyncOptions_2=($RsyncOptions_2) # split into an array
-    
+	
 	if [[ -z "${SkipFlag-}" ]]; then	 #Use the command line value of skipflag by default, then value in input file if it's not set		
 		SkipFlag=$(grep -w '^SkipFlag' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) # Defines what folders to skip
 	fi
@@ -181,16 +179,17 @@ function parse_input () {
 
 #This function parses the instrument-specific lines in the input file.
 function get_instrumentinput () {
-
+	
 	#Get paths and other variables from Input
 	InstrumentLine=$(grep -w "^$Instrument" <<< "$Input" ) #Instrument line in input file
 	SSHAlias=$(echo "$InstrumentLine" | cut -f 2 ) #SSH alias for instrument 
-	RemoteUser=$(echo "$InstrumentLine" | cut -f 3 ) #Remote user you will be SSHing to instrument computer as	
-	RemoteDataPath=$(echo "$InstrumentLine" | cut -f 4 ) #Top directory of data file structure on the remote machine
-	LocalDataPath=$(echo "$InstrumentLine" | cut -f 5 ) #Top directory of data file structure on the local machine
-	MountedPath=$(echo "$InstrumentLine" | cut -f 6 ) #Top directory of second file structure (for example, mounted windows machine, external drive), if used
+	RemoteUser=$(echo "$InstrumentLine" | cut -f 3 ) #Remote user you will be SSHing to instrument computer as
+        nmrFolderFlag=$(echo "$InstrumentLine" | cut -f 4 ) #Flag that indicates whether datasets are contained within an 'nmr' folder in the user folder or just the user folder
+	RemoteDataPath=$(echo "$InstrumentLine" | cut -f 5 ) #Top directory of data file structure on the remote machine
+	LocalDataPath=$(echo "$InstrumentLine" | cut -f 6 ) #Top directory of data file structure on the local machine
+	MountedPath=$(echo "$InstrumentLine" | cut -f 7 ) #Top directory of second file structure (for example, mounted windows machine, external drive), if used
 	
-	#Exit if there aren't at least 5 entries in the Instrument line in $Input
+	#Exit if there aren't at least 6 entries in the Instrument line in $Input
 	[[ -z "$LocalDataPath" ]] && { echo "LocalDataPath is empty" ; exit 1; }
 
  	#Names of sync and skip lists in the log folder
@@ -220,13 +219,13 @@ function make_skipfile () {
 
 	if [[ "$SkipFlag" != "period" ]]; then
 		#generate a list of duplicate file names on $Instrument differing only in case
-		"${SSH_cmd[@]}" "cd $RemoteDataPath; find $RemoteDataPath/*/nmr/ -maxdepth 1 -name .svn -type d -prune -false -o -print | perl -ne "		\
+		"${SSH_cmd[@]}" "cd $RemoteDataPath; find $RemoteDataPath/*$nmrFolder/ -maxdepth 1 -name .svn -type d -prune -false -o -print | perl -ne "		\
 		\''push @{$f{lc($_)}}, $_; END{map{print @{$f{$_}}} grep {@{$f{$_}}>1} sort keys %f}'\' | cat > "$SkipFileNew"
 	fi
 	
 	if [[ "$SkipFlag" != "dup" ]]; then
 	#add to the list any file names that end in a period
-		"${SSH_cmd[@]}" "cd $RemoteDataPath; find $RemoteDataPath/*/nmr/*. -maxdepth 0 -type d 2> /dev/null" | cat >> "$SkipFileNew"
+		"${SSH_cmd[@]}" "cd $RemoteDataPath; find $RemoteDataPath/*$nmrFolder/*. -maxdepth 0 -type d 2> /dev/null" | cat >> "$SkipFileNew"
 	fi
 
 	#get rid of full path and remove the starting / skiplist
@@ -253,7 +252,7 @@ function make_syncfile () {
 
 	#generate, then transfer a list of user directories ($SyncFile) that have changed recently (in the last $AgeDay days)
 	#on $Instrument data folder. Order the experiments in the order that they were acquired 
-	"${SSH_cmd[@]}" "cd $RemoteDataPath; find * -maxdepth 2 -type d $Age -printf '%T@\t%Tc %6k KiB %p\n' | sort -n | cut -f 2- " 					\
+	"${SSH_cmd[@]}" "cd $RemoteDataPath; find * -maxdepth $MaxDepthNMR -type d $Age -printf '%T@\t%Tc %6k KiB %p\n' | sort -n | cut -f 2- " 					\
 	"| grep -o ' KiB .*' | sed -e 's^ KiB ^^g'" | cat > "$SyncFile" 
 	
 	#clean up the $SyncFile
@@ -334,6 +333,16 @@ while IFS= read -r -u10 Instrument ; do
 		SSH_cmd=(ssh "$RemoteUser@$SSHAlias")
 	fi
         
+	#Define remote data path to search (with or without /nmr depending on nmrFolderFlag)
+	
+	if [[ $nmrFolderFlag == 'n' ]]; then	
+		nmrFolder=''
+		MaxDepthNMR=1
+	else
+		nmrFolder='/nmr'
+		MaxDepthNMR=2
+	fi
+
 	>"$SkipFileNew"	#empty skipfile
 	if [[ "$SkipFlag" != "none" ]]; then	
 		#make the skipfile
@@ -368,14 +377,22 @@ while IFS= read -r -u10 Instrument ; do
 
 		RsyncInstrOpts_1=() #empty the array
 		RsyncInstrOpts_2=() #empty the array
+		
+		
 
 		if [[ $ProtectArgs == "" ]]; then  #remove --protect-args from rsync options if it's not compatible with remote rsync version
-			RsyncInstrOpts_1=$(echo $RsyncOptions_1 | sed 's/--protect-args//g')
-			RsyncInstrOpts_2=$(echo $RsyncOptions_2 | sed 's/--protect-args//g')
+
+			
+			RsyncInstrOpts_1str=$(echo $RsyncOptions_1 | sed 's/--protect-args//g')
+			RsyncInstrOpts_2str=$(echo $RsyncOptions_2 | sed 's/--protect-args//g')
+			RsyncInstrOpts_1=($RsyncInstrOpts_1str) # split into an array
+			RsyncInstrOpts_2=($RsyncInstrOpts_2str) # split into an array
+
 		else
-			RsyncInstrOpts_1=$(echo $RsyncOptions_1)
-			RsyncInstrOpts_2=$(echo $RsyncOptions_2)
+			RsyncInstrOpts_1=($RsyncOptions_1) # split into an array
+			RsyncInstrOpts_2=($RsyncOptions_2) # split into an array
 		fi
+
 		
 		if [[ $FilesFrom == "" ]]; then #if $FilesFrom is empty, then we need to make a more complex syncfile, "$IncludeFromSyncFile"
 			make_includefromsyncfile		#function above
@@ -396,7 +413,7 @@ while IFS= read -r -u10 Instrument ; do
 		fi	
 
 		## sync data over
-
+		
 		RsyncInstrOpts_1+=(${RsyncOptions_0[@]}) 	
 		
 		echo "Syncing from $RemoteDataPath on $Instrument to $LocalDataPath."		
