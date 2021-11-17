@@ -418,6 +418,8 @@ while IFS= read -r -u10 Instrument ; do
 		
 		echo "Syncing from $RemoteDataPath on $Instrument to $LocalDataPath."		
 
+		mkdir -p "$LocalDataPath" #Make destination path if it doesn't exist
+
 		if [ $ManualFlag == 'y' ]; then
 			rsync "${RsyncInstrOpts_1[@]}" -e "ssh -o "${SSH_cmd[2]}"" "$RemoteUser@$SSHAlias:$RemoteDataPath/" "$LocalDataPath/"
 		else
@@ -427,6 +429,7 @@ while IFS= read -r -u10 Instrument ; do
 		## sync data from local data path to mounted file share, if desired
 		if ! [[ $MountedPath == "" ]]; then 
 			echo "Syncing from $LocalDataPath to $MountedPath"
+			mkdir -p "$MountedPath" #Make destination path if it doesn't exist
 			RsyncInstrOpts_2+=(${RsyncOptions_0[@]})
 			rsync "${RsyncInstrOpts_2[@]}" "$LocalDataPath/" "$MountedPath/"
 		fi
