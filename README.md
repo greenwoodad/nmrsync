@@ -147,7 +147,7 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 	
 * `/nmr folder?`: Set this to 'y' for the default /(user)/nmr/(data set)/(expt #) data organization on the remote computer. Set it to 'n' for data organized as /(user)/(data set)/(expt #)
 
-* `RemoteDataPath`: Full path containing NMR data on the remote comupter. Topspin/ICON-NMR usernames should be found in this folder. Use full path!
+* `RemoteDataPath`: Full path containing NMR data on the remote computer. Topspin/ICON-NMR usernames should be found in this folder. Use full path!
 
 * `LocalDataPath`: Full path on local computer to transfer the data to. Use full path!
 
