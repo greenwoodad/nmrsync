@@ -168,21 +168,21 @@ nmrsync [OPTIONS]... path/to/nmrsync_input
 
 Options
 
-*-h, -?, --help					Show help message.
+ `-h, -?, --help`                        Show help message.
 
-*-i, --input					Set input file (flag optional).
+ `-i, --input`                           Set input file (flag optional).
 
-*-s, --skip (default 'both')			Set to 'period' to skip folders ending in period, 
-						'dup' to skip case-insensitive duplicates, 'both' 
-						to skip both and 'none' to skip none.
+ `-s, --skip (default 'both')`           Set to 'period' to skip folders ending in period, 
+                                         'dup' to skip case-insensitive duplicates, 'both' 
+                                         to skip both and 'none' to skip none.
 
-*-m, --manual (default n)                 Set to y to operate in manual mode (enter password 
+`-m, --manual (default n)`               Set to y to operate in manual mode (enter password 
                                          instead of using SSH keys--not recommended).
 										 
-`-e, --excludelist (default y)`:         Set to n to not utilize instrument-specific exclude 
+`-e, --excludelist (default y)`          Set to n to not utilize instrument-specific exclude 
                                          list in the input folder (will copy processed data).
 										 
-`-f, --full (default n)`:                Set to y to copy over all data instead of just 
+`-f, --full (default n)`                 Set to y to copy over all data instead of just 
                                          recently added data."
 
 The defaults here can be modified at the top of the script itself.
