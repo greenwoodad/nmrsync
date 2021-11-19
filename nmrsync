@@ -259,7 +259,6 @@ function make_syncfile () {
 	sed -i '/^\.$/d' "$SyncFile" #get rid of the "." directory
 	sed -i '/\/nmr$/d' "$SyncFile" #removes lines ending in /nmr
 	sed -i '/\//!d' "$SyncFile" #removes lines lacking / character (just username, no dataset)
-
 	sed -i '$!N; /^\(.*\)\n\1$/!P; D' "$SyncFile" #removes consecutive duplicate lines
 
 	#prepare the $SyncFileCurrent (synclist.Instrument.current)
