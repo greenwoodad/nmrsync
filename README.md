@@ -168,13 +168,13 @@ nmrsync [OPTIONS]... path/to/nmrsync_input
 
 Options
 
--h, -?, --help                           Show help message.
+-h, -?, --help					Show help message.
 
--i, --input                              Set input file (flag optional).
+-i, --input					Set input file (flag optional).
 
--s, --skip (default 'both')              Set to 'period' to skip folders ending in period, 
-                                         'dup' to skip case-insensitive duplicates, 'both' 
-                                         to skip both and 'none' to skip none.
+-s, --skip (default 'both')			Set to 'period' to skip folders ending in period, 
+						'dup' to skip case-insensitive duplicates, 'both' 
+						to skip both and 'none' to skip none.
 
 -m, --manual (default n)                 Set to y to operate in manual mode (enter password 
                                          instead of using SSH keys--not recommended).
