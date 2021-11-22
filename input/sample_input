@@ -1,5 +1,4 @@
 ScriptsPath      /home/nmr/nmrsync            #Location of main script and input, emailtxt, and log folders on local machine
-SendmailPath     /usr/sbin                    #Location of the sendmail application on local machine (probably /usr/sbin)
 ManagerEmail     nmrmgr@mail.university.edu   #Email address of NMR facility manager
 AgeDay           3                            #How many days back to look for recent experiments to sync
 RsyncOptions_1   -auvr --protect-args         #rsync options for first rsync 
