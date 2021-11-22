@@ -195,7 +195,7 @@ To run this as a cron job, make an entry in your crontab like this:
 In the preceding example, there is a second input file which is configured to run looking for data that has been collected over the last week. The "fast" version is set to run every five minutes ( * /5) while the "slow" version is set to run on Sunday (0) at 6:40 AM (40 6).
 
 ## Contributing
-Pull requests are welcome. 
+Pull requests and bug reports are welcome. 
 
 ## Authors
 
