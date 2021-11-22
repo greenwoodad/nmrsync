@@ -127,8 +127,6 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 * `ScriptsPath`: Full path to the location of the main script and the input, emailtxt, and log folders on local machine. Use full path!
 
-* `SendmailPath`: Location of the sendmail application on local machine, probably /usr/sbin.
-
 * `ManagerEmail`: Email address of the NMR facility manager.
 
 * `AgeDay`: How many days back to look for recent experiments to sync. Default is 3, which works well unless you run spectra that take longer than 3 days to acquire.
@@ -158,7 +156,7 @@ IMPORTANT: When editing this file, entries should be separated by either a tab o
 Instruments in the instrument table can be commented out with a #. 
 
 
-NOTE: Additional modifications can be made to the variables 'ManualFlag', 'ExcludeFlag', and 'FullFlag' at top of the script itself. These are the default values for options that can be provided when the script is run (see Usage, below).
+NOTE: Additional modifications can be made to the variables 'SendMailPath', 'ManualFlag', 'ExcludeFlag', and 'FullFlag' at top of the script itself. These are generally the default values for options that can be provided when the script is run (see Usage, below).
 
 ## Usage
 
