@@ -27,6 +27,7 @@ set -u # exit if variable is unset
 ManualFlag="n" #specifies whether to manually input passwords for SSH -- use 'y' if you don't have password-less SSH set up to avoid entering password more than once
 ExcludeFlag="y" #specifies whether the instrument-specific exclude file is used or not
 FullFlag="n" #specifies whether to sync the whole file structure or just new files
+SendmailPath='/usr/sbin'	#path containing sendmail binary, probably /usr/sbin or /usr/bin
 
 ##functions
 
@@ -152,7 +153,6 @@ function parse_input () {
 	#extract out instrument-independent parameters from top 6 lines of input file
 	ManagerEmail=$(grep -w '^ManagerEmail' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #NMR manager's email address
 	ScriptsPath=$(grep -w '^ScriptsPath' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #path containing log and input folders and probably this script 
-	SendmailPath=$(grep -w '^SendmailPath' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #path containing sendmail, usually /usr/sbin
 	
 	AgeDay=$(grep -w '^AgeDay' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #How far back to look for recent spectra, in days
 	RsyncOptions_1=$(grep -w '^RsyncOptions_1' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) # Options for the first rsync
