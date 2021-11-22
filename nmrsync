@@ -379,11 +379,8 @@ while IFS= read -r -u10 Instrument ; do
 		RsyncInstrOpts_1=() #empty the array
 		RsyncInstrOpts_2=() #empty the array
 		
-		
-
 		if [[ $ProtectArgs == "" ]]; then  #remove --protect-args from rsync options if it's not compatible with remote rsync version
-
-			
+		
 			RsyncInstrOpts_1str=$(echo $RsyncOptions_1 | sed 's/--protect-args//g')
 			RsyncInstrOpts_2str=$(echo $RsyncOptions_2 | sed 's/--protect-args//g')
 			RsyncInstrOpts_1=($RsyncInstrOpts_1str) # split into an array
