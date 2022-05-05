@@ -20,8 +20,8 @@ automatically using nmrfolderfix (https://github.com/greenwoodad/nmrfolderfix/).
 There is an option to perform a second rsync to a second local location by specifying 
 a third path in the input file. This rsync is performed with different customizable 
 options. In the example input file, the second rsync skips copying permissions, 
-modification times, or group information which enables (at least on my system) 
-copying to a mounted windows file share.
+user, or group information because this can't actually be changed on my mounted 
+Windows filesystem.
 
 I personally run this as a cron job every five minutes as well as every week with a second 
 input file to ensure data is still eventually transferred after network or power outages. 
@@ -133,7 +133,7 @@ In the input file (nmrsync_input) there are a number of parameters and paths to 
 
 * `RsyncOptions_1`: Rsync options for first rsync. Default is '-auvr --protect-args'
 
-* `RsyncOptions_2`: Rsync options for second rsync (optional). Default is '-uvrlD --protect-args' 
+* `RsyncOptions_2`: Rsync options for second rsync (optional). Default is '-uvrltD --modify-window=1 --protect-args' 
 
 * `SkipFlag`: Defines what folders are not synced. 'period' to skip folders ending in a period, 'dup' to skip folders with case-insensitive duplicates, 'both,' or 'none.' Default is 'both.' Note that if a different value of SkipFlag is specified with -s when the script is run, it overrules the value specified in the input file.			
 
