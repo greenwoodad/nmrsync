@@ -2,7 +2,7 @@ ScriptsPath      /home/nmr/nmrsync            #Location of main script and input
 ManagerEmail     nmrmgr@mail.university.edu   #Email address of NMR facility manager
 AgeDay           3                            #How many days back to look for recent experiments to sync
 RsyncOptions_1   -auvr --protect-args         #rsync options for first rsync 
-RsyncOptions_2   -uvrlD --protect-args        #rsync options for second rsync (optional)
+RsyncOptions_2   -auvr --modify-window=1 --no-p --no-o --no-g --protect-args       #rsync options for second rsync (optional)
 SkipFlag         both                         #Skipflag: 'period' to skip folders ending in a period, 'dup' to skip folders
                                               #with case-insensitive duplicates, 'both,' or 'none'
 
