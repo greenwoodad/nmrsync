@@ -1,13 +1,17 @@
-ScriptsPath      /home/nmr/nmrsync            #Location of main script and input, emailtxt, and log folders on local machine
-ManagerEmail     nmrmgr@mail.university.edu   #Email address of NMR facility manager
-AgeDay           3                            #How many days back to look for recent experiments to sync
-RsyncOptions_1   -auvr --protect-args         #rsync options for first rsync 
-RsyncOptions_2   -uvrltD --modify-window=1 --protect-args       #rsync options for second rsync (optional)
-SkipFlag         both                         #Skipflag: 'period' to skip folders ending in a period, 'dup' to skip folders
-                                              #with case-insensitive duplicates, 'both,' or 'none'
+ScriptsPath             /home/nmr/nmrsync         	          	     #Location of the main script and the input, emailtxt, and log folders on local machine
+ManagerEmail            nmrmgr@mail.university.edu                   #Email address of NMR facility manager
+Age                  	  1                                      	     #How many days/mins/hrs back to look for recent experiments to sync
+Timescale               day                                          #Units for "Age"-- use 'day' 'hr' or 'min'	
+RsyncOptions            -quvrltD --modify-window=1 --protect-args    #rsync options
+SkipFlag                both                                         #Skipflag: 'period' to skip folders ending in a period, 'dup' to skip folders with 
+                                                                     #case-insensitive duplicates, 'both,' or 'none'
 
-Instrument  SSHAlias  RemoteUser  /nmr folder?  RemoteDataPath          LocalDataPath                      MountedPath (optional)
-AV400       AV400     nmr1        y             /home/nmr1/data         /home/nmruser/AV400_Backup         /mnt/NMRData/AV400
-NEO400a     NEO400    nmr         y             /opt/nmrdata/nmr/data   /home/nmruser/NEO400_Backup/data   /mnt/NMRData/NEO400/data
-NEO400b     NEO400    nmr         n             /opt/nmrdata/nmr        /home/nmruser/NEO400_Backup        /mnt/NMRData/NEO400
-DMX500      DMX500    nmrsu       y             /opt/xwinnmr/data       /home/nmruser/DMX500_Backup        /mnt/NMRData/DMX500
+Instrument  	   /nmr directory?  sort data by username?    SourceDataPath          DestinationDataPath			            SSHAlias (optional)     RemoteUser (optional) 
+AV400              y                y                       /home/nmr1/data         /mnt/NMRDataNew                     AV400                   nmr1  
+AV500b             y                y                       /opt/NMR_data/data      /mnt/NMRDataNew                     AV500                   nmrsu
+NEO400a            y                y	                      /opt/nmrdata/nmr/data   /mnt/NMRDataNew                     NEO400                  nmr
+NEO400b            n                y	                      /opt/nmrdata/nmr        /mnt/NMRDataNew                     NEO400 	                nmr      
+AV400_oldserv      y                n                       /home/nmr1/data         /mnt/NMRData/AV400                  AV400                   nmr1  
+AV500b_oldserv     y                n                       /opt/NMR_data/data      /mnt/NMRData/AV500                  AV500                   nmrsu
+NEO400a_oldserv    y                n	                      /opt/nmrdata/nmr/data   /mnt/NMRData/NEO400/data            NEO400                  nmr
+NEO400b_oldserv    n                n	                      /opt/nmrdata/nmr        /mnt/NMRData/NEO400                 NEO400 	                nmr      
