@@ -6,14 +6,14 @@
 #
 # This program is meant to be run as a cron job to regularly copy (using rsync) recent NMR experiments to
 # a data server. It takes an input file as an argument which provides information including paths,
-# SSH aliases, and rsync options. The script searches for files that have been modified recently (< x days/hr/min 
+# SSH aliases, and rsync options. The script searches for files that have been modified recently (< x days/hr/min
 # as specified in the input file), searching in folders up to the level of SourceDataPath/<user>/nmr/<data set>.
-# For example, if a new spectrum 1/ or 2/ appears in the data set folder, the experiment is flagged for 
-# syncing, but if something deeper (e.g. a proc file in a pdata folder) is changed, it won't be flagged. 
-# 
-# Before syncing, the script searches for folders that are identically named except for case differences 
-# (which are unique in Linux but indistinguishable on Windows and Mac), as well as for folders that end in 
-# a period (which is permissible on Linux and Mac but not on Windows). The names of these folders are 
+# For example, if a new spectrum 1/ or 2/ appears in the data set folder, the experiment is flagged for
+# syncing, but if something deeper (e.g. a proc file in a pdata folder) is changed, it won't be flagged.
+#
+# Before syncing, the script searches for folders that are identically named except for case differences
+# (which are unique in Linux but indistinguishable on Windows and Mac), as well as for folders that end in
+# a period (which is permissible on Linux and Mac but not on Windows). The names of these folders are
 # listed in SkipFileOld and they are not synced. An email is instead sent to the NMR manager who can then
 # manually change the folder names once the data has finished acquiring. However, this can be acomplished
 # automatically using nmrfolderfix (https://github.com/greenwoodad/nmrfolderfix/).
@@ -27,38 +27,38 @@ set -u # exit if variable is unset
 ManualFlag="n" #specifies whether to manually input passwords for SSH -- use 'y' if you don't have password-less SSH set up to avoid entering password more than once
 ExcludeFlag="y" #specifies whether the instrument-specific exclude file is used or not
 FullFlag="n" #specifies whether to sync the whole file structure or just new files
-SendmailPath='/usr/sbin'	#path containing sendmail binary, probably /usr/sbin or /usr/bin
-VerboseFlag='n'	#verbose mode, gives more informative output
+SendmailPath='/usr/sbin'        #path containing sendmail binary, probably /usr/sbin or /usr/bin
+VerboseFlag='n' #verbose mode, gives more informative output
 ##functions
 
 #This function displays usage information if there is no recognizable input file argument.
 function Show_Usage() {
-	echo ""
-	echo "Usage: nmrsync [OPTIONS]... path/to/nmrsync_input"
-	echo ""
-	echo "Options"
-	echo " -h, -?, --help                           Show this help message."
-	echo ""
-	echo " -i, --input                              Set input file (flag optional)."
-	echo ""
-	echo " -s, --skip (default 'both')              Set to 'period' to skip folders ending in period, "
-	echo "                                          'dup' to skip case-insensitive duplicates, 'both' "
-	echo "                                          to skip both and 'none' to skip none."
-	echo ""
-	echo " -m, --manual                             Manual mode: enter password instead of using SSH "
-	echo "                                          keys (not recommended)."
-	echo ""
-	echo " -p, --processed				Processed data mode: will ignore excludelist.instrument "
-	echo "                                          in the input folder and copy processed data."
-	echo ""
-	echo " -f, --full                		Full mode: copy over all data instead of just "
-	echo "                                          recently added data."
-	echo ""
-	echo " -v, --verbose   				Verbose mode"
-	echo ""                                          
-	echo "For more information, please see the README file:"
-	echo "https://github.com/greenwoodad/nmrsync/README.md"
-	echo ""
+        echo ""
+        echo "Usage: nmrsync [OPTIONS]... path/to/nmrsync_input"
+        echo ""
+        echo "Options"
+        echo " -h, -?, --help                           Show this help message."
+        echo ""
+        echo " -i, --input                              Set input file (flag optional)."
+        echo ""
+        echo " -s, --skip (default 'both')              Set to 'period' to skip folders ending in period, "
+        echo "                                          'dup' to skip case-insensitive duplicates, 'both' "
+        echo "                                          to skip both and 'none' to skip none."
+        echo ""
+        echo " -m, --manual                             Manual mode: enter password instead of using SSH "
+        echo "                                          keys (not recommended)."
+        echo ""
+        echo " -p, --processed                                                  Processed data mode: will ignore excludelist.instrument "
+        echo "                                          in the input folder and copy processed data."
+        echo ""
+        echo " -f, --full                                               Full mode: copy over all data instead of just "
+        echo "                                          recently added data."
+        echo ""
+        echo " -v, --verbose                                                Verbose mode"
+        echo ""
+        echo "For more information, please see the README file:"
+        echo "https://github.com/greenwoodad/nmrsync/README.md"
+        echo ""
 }
 
 function check_dependencies() {
@@ -70,285 +70,302 @@ function check_dependencies() {
 function parse_flags () {
 
 while [[ ! -z "${1-}" ]] ; do
-	case "$1" in
-		-h|-\?|--help)
-			Show_Usage
-			exit 1
-			;;
-		-i|--input)
-			shift
-			Input="$1"
-			;;
-		-s|--skip)
-			shift
-			SkipFlag="$1"
-			if ! [[ "$SkipFlag" == 'dup' || "$SkipFlag" == 'period' || "$SkipFlag" == 'both' || "$SkipFlag" == 'none' ]]; then
-				echo "Invalid skip option."
-				echo ""
-				Show_Usage
-				exit 1
-			fi
-			;;
-		-m|--manual)
-			ManualFlag='y'
-			;;
-		-p|--processed)
-			ExcludeFlag='n'
-			;;
-		-f|--full)
-			FullFlag='y'
-			;;
-		-v|--verbose)
-			VerboseFlag='y'
-			;;					
-		-*)
-			echo "Unknown option: \"$1\""
-			Show_Usage
-			exit 1
-			;;
-		*)
-			Input="$1"
-			;;			
-	esac
+        case "$1" in
+                -h|-\?|--help)
+                        Show_Usage
+                        exit 1
+                        ;;
+                -i|--input)
+                        shift
+                        Input="$1"
+                        ;;
+                -s|--skip)
+                        shift
+                        SkipFlag="$1"
+                        if ! [[ "$SkipFlag" == 'dup' || "$SkipFlag" == 'period' || "$SkipFlag" == 'both' || "$SkipFlag" == 'none' ]]; then
+                                echo "Invalid skip option."
+                                echo ""
+                                Show_Usage
+                                exit 1
+                        fi
+                        ;;
+                -m|--manual)
+                        ManualFlag='y'
+                        ;;
+                -p|--processed)
+                        ExcludeFlag='n'
+                        ;;
+                -f|--full)
+                        FullFlag='y'
+                        ;;
+                -v|--verbose)
+                        VerboseFlag='y'
+                        ;;
+                -*)
+                        echo "Unknown option: \"$1\""
+                        Show_Usage
+                        exit 1
+                        ;;
+                *)
+                        Input="$1"
+                        ;;
+        esac
 
-	shift
+        shift
 done
 
-[[ "$VerboseFlag" == 'y' && "$ManualFlag" == 'y' ]] && {	echo "Manual flag is set! You will be prompted for passwords." ; }
-[[ "$VerboseFlag" == 'y' && "$ExcludeFlag" == 'n' ]] && {	echo "Processed data flag is set! Copying processed data in addition to raw data." ; }
-[[ "$VerboseFlag" == 'y' && "$FullFlag" == 'y' ]] && {	echo "Full flag is set! All data is being copied instead of only recent data! This may take a long time." ; }
+[[ "$VerboseFlag" == 'y' && "$ManualFlag" == 'y' ]] && {        echo "Manual flag is set! You will be prompted for passwords." ; }
+[[ "$VerboseFlag" == 'y' && "$ExcludeFlag" == 'n' ]] && {       echo "Processed data flag is set! Copying processed data in addition to raw data." ; }
+[[ "$VerboseFlag" == 'y' && "$FullFlag" == 'y' ]] && {  echo "Full flag is set! All data is being copied instead of only recent data! This may take a long time." ; }
 
 }
 
 #This function is used to send emails in the event of bad file names (duplicates or ending-in-period).
 function Send_Email () {
 {
-	echo "From: Do-Not-Reply@NMR-Facility"
-	echo "To: $1"
-	echo "Subject: NMR experiment on $Instrument $3"
-	echo
-	eval echo "$(<$ScriptsPath/emailtxt/$2)" 
+        echo "From: Do-Not-Reply@NMR-Facility"
+        echo "To: $1"
+        echo "Subject: NMR experiment on $Instrument $3"
+        echo
+        eval echo "$(<$ScriptsPath/emailtxt/$2)"
 } | "$SendmailPath"/sendmail -t
 }
 
 #This function parses the input file.
 function parse_input () {
 
-	Input_File="$1"
-	Input=$( cat "$Input_File" | sed 's/ \t/  /g' | sed 's/\t /  /g' | sed 's/   */\t/g' | sed 's:\t\t*:\t:g' ) #replace space+tab with two spaces \
-	#then tab+space with two spaces, then multiple spaces with tabs, then multiple tabs with single tabs
+        Input_File="$1"
+        Input=$( cat "$Input_File" | sed 's/ \t/  /g' | sed 's/\t /  /g' | sed 's/   */\t/g' | sed 's:\t\t*:\t:g' ) #replace space+tab with two spaces \
+        #then tab+space with two spaces, then multiple spaces with tabs, then multiple tabs with single tabs
 
-	#extract out the list of instruments
-	Instrument_Array=''
-	while IFS=$'\t' read -r column1 column2 column3 column4 column5 column6; do 
-		Instrument_Array="$Instrument_Array"$'\n'${column1}
-	done < <(echo "${Input}")
-	Instrument_Array=$(echo "${Instrument_Array}"| sed -e '1,/Instrument/d' | tail -n +1 | sed '/^#/d' | sed '/^$/d') #read list of instruments, skipping lines that start with #		
-			
-	#extract out instrument-independent parameters from top 6 lines of input file
-	ManagerEmail=$(grep -w '^ManagerEmail' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #NMR manager's email address
-	ScriptsPath=$(grep -w '^ScriptsPath' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #path containing log and input folders and probably this script 
-	
-	AgeNum=$(grep -w '^Age' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #How far back to look for recent spectra, in either days, hr or min
-	Timescale=$(grep -w '^Timescale' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #timescale for Age, either days, hr or min
-	RsyncOptions_1=$(grep -w '^RsyncOptions' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) # Options for the rsync
-	
-	if [[ -z "${SkipFlag-}" ]]; then	 #Use the command line value of skipflag by default, then value in input file if it's not set		
-		SkipFlag=$(grep -w '^SkipFlag' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) # Defines what folders to skip
-	fi
+        #extract out the list of instruments
+        Instrument_Array=''
+        while IFS=$'\t' read -r column1 column2 column3 column4 column5 column6; do
+                Instrument_Array="$Instrument_Array"$'\n'${column1}
+        done < <(echo "${Input}")
+        Instrument_Array=$(echo "${Instrument_Array}"| sed -e '1,/Instrument/d' | tail -n +1 | sed '/^#/d' | sed '/^$/d') #read list of instruments, skipping lines that start with #
 
-	#Stop the script if these inputs aren't found in the input file
-	[[ -z "$ManagerEmail" ]] && { echo "ManagerEmail is empty" ; exit 1; }
-	[[ -z "$ScriptsPath" ]] && { echo "ScriptsPath is empty" ; exit 1; }
-	[[ -z "$SendmailPath" ]] && { echo "SendmailPath is empty" ; exit 1; }
-	[[ -z "$AgeNum" ]] && { echo "Age is empty" ; exit 1; }
-	[[ -z "$Timescale" ]] && { echo "Timescale is empty. Input file may be old format. See new format at: https://github.com/greenwoodad/nmrsync/blob/main/input/sample_input" ; exit 1; }
-	[[ -z "$SkipFlag" ]] && { echo "SkipFlag is empty" ; exit 1; }
-	[[ -z "$RsyncOptions_1" ]] && { echo "RsyncOptions is empty. Input file may be old format (written RsyncOptions_1 instead). See new format at: https://github.com/greenwoodad/nmrsync/blob/main/input/sample_input" ; exit 1; } #Needs to at least have -r in it
+        #extract out instrument-independent parameters from top 6 lines of input file
+        ManagerEmail=$(grep -w '^ManagerEmail' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #NMR manager's email address
+        ScriptsPath=$(grep -w '^ScriptsPath' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #path containing log and input folders and probably this script
+        LockFile="$ScriptsPath/lockfile"
 
-	InputPath="$ScriptsPath/input" #path for input files such as nmrsync_input
-	LogPath="$ScriptsPath/log" #path for log files, such as synclists
-	
-	if [[ "$Timescale" == "day" ]]; then
- 		Age='-mtime -'"$AgeNum" # string used to find folders to sync, going back $AgeNum days
-	elif [[ "$Timescale" == "hr" ]]; then
-		AgeNumMins=$(( 60*AgeNum ))
-		Age='-mmin -'"$AgeNumMins" # string used to find folders to sync, going back 60*$AgeNum minutes
-	elif [[ "$Timescale" == "min" ]]; then
-		Age='-mmin -'"$AgeNum" # string used to find folders to sync, going back $AgeNum minutes
-	else
-		echo "$Timescale is not a valid timscale-- use day, hr or min. exiting." ; exit 1
-	fi
-	
-[[ "$VerboseFlag" == 'y' ]] && {	echo "Copying data $AgeNum $Timescale old and newer." ; }
+        AgeNum=$(grep -w '^Age' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #How far back to look for recent spectra, in either days, hr or min
+        Timescale=$(grep -w '^Timescale' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) #timescale for Age, either days, hr or min
+        RsyncOptions_1=$(grep -w '^RsyncOptions' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) # Options for the rsync
+
+        if [[ -z "${SkipFlag-}" ]]; then         #Use the command line value of skipflag by default, then value in input file if it's not set
+                SkipFlag=$(grep -w '^SkipFlag' <<< "$Input" | cut -d "#" -f1 | cut -f 2 ) # Defines what folders to skip
+        fi
+
+        #Stop the script if these inputs aren't found in the input file
+        [[ -z "$ManagerEmail" ]] && { echo "ManagerEmail is empty" ; exit 1; }
+        [[ -z "$ScriptsPath" ]] && { echo "ScriptsPath is empty" ; exit 1; }
+        [[ -z "$SendmailPath" ]] && { echo "SendmailPath is empty" ; exit 1; }
+        [[ -z "$AgeNum" ]] && { echo "Age is empty" ; exit 1; }
+        [[ -z "$Timescale" ]] && { echo "Timescale is empty. Input file may be old format. See new format at: https://github.com/greenwoodad/nmrsync/blob/main/input/sample_input" ; exit 1; }
+        [[ -z "$SkipFlag" ]] && { echo "SkipFlag is empty" ; exit 1; }
+        [[ -z "$RsyncOptions_1" ]] && { echo "RsyncOptions is empty. Input file may be old format (written RsyncOptions_1 instead). See new format at: https://github.com/greenwoodad/nmrsync/blob/main/input/sample_input" ; exit 1; } #Needs to at least have -r in it
+
+        InputPath="$ScriptsPath/input" #path for input files such as nmrsync_input
+        LogPath="$ScriptsPath/log" #path for log files, such as synclists
+
+        if [[ "$Timescale" == "day" ]]; then
+                Age='-mtime -'"$AgeNum" # string used to find folders to sync, going back $AgeNum days
+        elif [[ "$Timescale" == "hr" ]]; then
+                AgeNumMins=$(( 60*AgeNum ))
+                Age='-mmin -'"$AgeNumMins" # string used to find folders to sync, going back 60*$AgeNum minutes
+        elif [[ "$Timescale" == "min" ]]; then
+                Age='-mmin -'"$AgeNum" # string used to find folders to sync, going back $AgeNum minutes
+        else
+                echo "$Timescale is not a valid timscale-- use day, hr or min. exiting." ; exit 1
+        fi
+
+[[ "$VerboseFlag" == 'y' ]] && {        echo "Copying data $AgeNum $Timescale old and newer." ; }
 
 }
 
+# Function to lock if LockFile exists
+acquire_lock() {
+    while true; do
+        if mkdir "$LockFile" 2>/dev/null; then
+            return 0 # Lock successfully acquired
+        else
+            echo "Lock file exists, waiting..."
+            sleep 15 # Wait for 15 seconds before retrying
+        fi
+    done
+}
+
+# Function to release the lock
+release_lock() {
+    rmdir "$LockFile" 2>/dev/null
+}
 
 
 #This function parses the instrument-specific lines in the input file.
 function get_instrumentinput () {
-	
-	#Get paths and other variables from Input
-	InstrumentLine=$(grep -w "^$Instrument" <<< "$Input" ) #Instrument line in input file
-    nmrFolderFlag=$(echo "$InstrumentLine" | cut -f 2 ) #Flag that indicates whether datasets are contained within an 'nmr' folder in the user folder or just the user folder
-	sortbyuserFlag=$(echo "$InstrumentLine" | cut -f 3 ) #Flag that indicates whether transferred data should be restructured to have $Instrument folders organized within a folder named $Current_Username
-	SourceDataPath=$(echo "$InstrumentLine" | cut -f 4 ) #Top directory of data file structure on the source machine
-	DestinationDataPath=$(echo "$InstrumentLine" | cut -f 5 ) #Top directory of data file structure on the destination machine
-	SSHAlias=$(echo "$InstrumentLine" | cut -f 6 ) #SSH alias for instrument (optional)
-	RemoteUser=$(echo "$InstrumentLine" | cut -f 7 ) #Remote user you will be SSHing to instrument computer as (optional)
 
-	
-	#Exit if there aren't at least 5 entries in the Instrument line in $Input
-	[[ -z "$DestinationDataPath" ]] && { echo "DestinationDataPath is empty" ; exit 1; }
-
-	#Exit if $nmrFolderFlag isn't y or n (in which case it's probably an old input file)
-	if ! [[ "$nmrFolderFlag" == 'y'  || "$nmrFolderFlag" == 'n' ]]; then 
-		echo "nmrfolderflag is $nmrFolderFlag for $Instrument"
-		echo "nmrFolderFlag not set correctly. Input file may be old format. See new format at: https://github.com/greenwoodad/nmrsync/blob/main/input/sample_input" ; exit 1; 
-	fi
-
-	[[ "$VerboseFlag" == 'y' && "$sortbyuserFlag" == 'y' ]] && {	echo "Data will be re-organized into user folders." ; }
+        #Get paths and other variables from Input
+        InstrumentLine=$(grep -w "^$Instrument" <<< "$Input" ) #Instrument line in input file
+        nmrFolderFlag=$(echo "$InstrumentLine" | cut -f 2 ) #Flag that indicates whether datasets are contained within an 'nmr' folder in the user folder or just the user folder
+        sortbyuserFlag=$(echo "$InstrumentLine" | cut -f 3 ) #Flag that indicates whether transferred data should be restructured to have $Instrument folders organized within a folder named $Current_Username
+        SourceDataPath=$(echo "$InstrumentLine" | cut -f 4 ) #Top directory of data file structure on the source machine
+        DestinationDataPath=$(echo "$InstrumentLine" | cut -f 5 ) #Top directory of data file structure on the destination machine
+        SSHAlias=$(echo "$InstrumentLine" | cut -f 6 ) #SSH alias for instrument (optional)
+        RemoteUser=$(echo "$InstrumentLine" | cut -f 7 ) #Remote user you will be SSHing to instrument computer as (optional)
 
 
-	#Determine if the rsync will use SSH or be local
-	LocalFlag='n'
-	[[ -z "$RemoteUser" ]] && { LocalFlag='y'; }
-	[[ "$VerboseFlag" == 'y' && "$LocalFlag" == 'y' ]] && {	echo "RemoteUser is empty, copying in local mode" ; }
+        #Exit if there aren't at least 5 entries in the Instrument line in $Input
+        [[ -z "$DestinationDataPath" ]] && { echo "DestinationDataPath is empty" ; exit 1; }
 
- 	#Names of sync and skip lists in the log folder
-	SyncFileCurrent="$LogPath/synclist.$Instrument.current"
-	SyncFileOld="$LogPath/synclist.$Instrument.old"
-	SyncFile="$LogPath/synclist.$Instrument"
-	SkipFileNew="$LogPath/skiplist.$Instrument.new"
-	SkipFileOld="$LogPath/skiplist.$Instrument.old"
-	ExcludeList="$InputPath/excludelist.$Instrument" #This is another list of things to exclude from sync, 
-	#customizable by instrument but by default contains filenames of processed data (1i 1r etc)
-	SyncFileUserSpecific="$LogPath/synclist.$Instrument.User" #Used when re-organizing data structure by username
-	SkipFileUserSpecific="$LogPath/skiplist.$Instrument.User" #Used when re-organizing data structure by username
+        #Exit if $nmrFolderFlag isn't y or n (in which case it's probably an old input file)
+        if ! [[ "$nmrFolderFlag" == 'y'  || "$nmrFolderFlag" == 'n' ]]; then
+                echo "nmrfolderflag is $nmrFolderFlag for $Instrument"
+                echo "nmrFolderFlag not set correctly. Input file may be old format. See new format at: https://github.com/greenwoodad/nmrsync/blob/main/input/sample_input" ; exit 1;
+        fi
 
-	#If there's no instrument-specific excludelist, make one using the default file
-	if [[ ! -f "$ExcludeList" && "$ExcludeFlag" == 'y' ]]; then
-		if [[ -f "$InputPath/excludelist" ]]; then
-			cp "$InputPath/excludelist" "$ExcludeList"
-			[[ "$VerboseFlag" == 'y' ]] && {	echo "Using default $InputPath/excludelist and copying to $ExcludeList." ; }	
-		else
-			echo "$ExcludeList and $InputPath/excludelist are both missing! Exiting."
-			exit 1
-		fi
-	fi
+        [[ "$VerboseFlag" == 'y' && "$sortbyuserFlag" == 'y' ]] && {    echo "Data will be re-organized into user folders." ; }
+
+
+        #Determine if the rsync will use SSH or be local
+        LocalFlag='n'
+        [[ -z "$RemoteUser" ]] && { LocalFlag='y'; }
+        [[ "$VerboseFlag" == 'y' && "$LocalFlag" == 'y' ]] && { echo "RemoteUser is empty, copying in local mode" ; }
+
+        #Names of sync and skip lists in the log folder
+        SyncFileCurrent="$LogPath/synclist.$Instrument.current"
+        SyncFileOld="$LogPath/synclist.$Instrument.old"
+        SyncFile="$LogPath/synclist.$Instrument"
+        SkipFileNew="$LogPath/skiplist.$Instrument.new"
+        SkipFileOld="$LogPath/skiplist.$Instrument.old"
+        ExcludeList="$InputPath/excludelist.$Instrument" #This is another list of things to exclude from sync,
+        #customizable by instrument but by default contains filenames of processed data (1i 1r etc)
+        SyncFileUserSpecific="$LogPath/synclist.$Instrument.User" #Used when re-organizing data structure by username
+        SkipFileUserSpecific="$LogPath/skiplist.$Instrument.User" #Used when re-organizing data structure by username
+
+        #If there's no instrument-specific excludelist, make one using the default file
+        if [[ ! -f "$ExcludeList" && "$ExcludeFlag" == 'y' ]]; then
+                if [[ -f "$InputPath/excludelist" ]]; then
+                        cp "$InputPath/excludelist" "$ExcludeList"
+                        [[ "$VerboseFlag" == 'y' ]] && {        echo "Using default $InputPath/excludelist and copying to $ExcludeList." ; }
+                else
+                        echo "$ExcludeList and $InputPath/excludelist are both missing! Exiting."
+                        exit 1
+                fi
+        fi
 
 }
 
 #This function generates a skipfile containing names of spectra to not skip
 function make_skipfile () {
-	
-	if [[ "$LocalFlag" == 'y' ]]; then
 
-		if [[ "$SkipFlag" != "period" ]]; then
+        if [[ "$LocalFlag" == 'y' ]]; then
 
-			#generate a list of duplicate file names on $Instrument differing only in case
-			cd "$SourceDataPath"; find "$SourceDataPath"/*$nmrFolder/ -maxdepth 1 -name .svn -type d -prune -false -o -print | perl -ne 		\
-			\''push @{$f{lc($_)}}, $_; END{map{print @{$f{$_}}} grep {@{$f{$_}}>1} sort keys %f}'\' | cat > "$SkipFileNew"
-		fi
-	
-		if [[ "$SkipFlag" != "dup" ]]; then
-			#add to the list any file names that end in a period
-			cd "$SourceDataPath"; find "$SourceDataPath"/*$nmrFolder/*. -maxdepth 0 -type d 2> /dev/null | cat >> "$SkipFileNew"
-		fi
+                if [[ "$SkipFlag" != "period" ]]; then
 
-	else
+                        #generate a list of duplicate file names on $Instrument differing only in case
+                        cd "$SourceDataPath"; find "$SourceDataPath"/*$nmrFolder/ -maxdepth 1 -name .svn -type d -prune -false -o -print | perl -ne                 \
+                        \''push @{$f{lc($_)}}, $_; END{map{print @{$f{$_}}} grep {@{$f{$_}}>1} sort keys %f}'\' | cat > "$SkipFileNew"
+                fi
 
-		if [[ "$SkipFlag" != "period" ]]; then
-			#generate a list of duplicate file names on $Instrument differing only in case
-			"${SSH_cmd[@]}" "cd $SourceDataPath; find $SourceDataPath/*$nmrFolder/ -maxdepth 1 -name .svn -type d -prune -false -o -print | perl -ne "		\
-			\''push @{$f{lc($_)}}, $_; END{map{print @{$f{$_}}} grep {@{$f{$_}}>1} sort keys %f}'\' | cat > "$SkipFileNew"
-		fi
-	
-		if [[ "$SkipFlag" != "dup" ]]; then
-		#add to the list any file names that end in a period
-			"${SSH_cmd[@]}" "cd $SourceDataPath; find $SourceDataPath/*$nmrFolder/*. -maxdepth 0 -type d 2> /dev/null" | cat >> "$SkipFileNew"
-		fi
+                if [[ "$SkipFlag" != "dup" ]]; then
+                        #add to the list any file names that end in a period
+                        cd "$SourceDataPath"; find "$SourceDataPath"/*$nmrFolder/*. -maxdepth 0 -type d 2> /dev/null | cat >> "$SkipFileNew"
+                fi
 
-	fi
+        else
+
+                if [[ "$SkipFlag" != "period" ]]; then
+                        #generate a list of duplicate file names on $Instrument differing only in case
+                        "${SSH_cmd[@]}" "cd $SourceDataPath; find $SourceDataPath/*$nmrFolder/ -maxdepth 1 -name .svn -type d -prune -false -o -print | perl -ne "          \
+                        \''push @{$f{lc($_)}}, $_; END{map{print @{$f{$_}}} grep {@{$f{$_}}>1} sort keys %f}'\' | cat > "$SkipFileNew"
+                fi
+
+                if [[ "$SkipFlag" != "dup" ]]; then
+                #add to the list any file names that end in a period
+                        "${SSH_cmd[@]}" "cd $SourceDataPath; find $SourceDataPath/*$nmrFolder/*. -maxdepth 0 -type d 2> /dev/null" | cat >> "$SkipFileNew"
+                fi
+
+        fi
 
 
-	#get rid of full path and remove the starting / skiplist
-	sed -e "s^$SourceDataPath^^g" -i "$SkipFileNew"
-	sed -e 's/^\///' -i "$SkipFileNew" 
-	
-	#check if contents are the same in old and new skipfiles, if not, send an email alerting NMR Manager
-	touch "$SkipFileOld" # in case the file does not exist
-	if ! cmp -s "$SkipFileNew" "$SkipFileOld"; then
- 		cp "$SkipFileNew" "$SkipFileOld" #Replace old skipfile with new one
-		SkipFileContents=$(cat $SkipFileNew)
-		if ! [[ "$SkipFileContents" == "" ]]; then #don't bother if the current SkipFile is empty
-			[[ "$VerboseFlag" == 'y' ]] && {	echo "Some spectra not synced: $SkipFileContents" ; }	
-			Send_Email "$ManagerEmail" "emailtxt_skips" "Duplicate or *. folder name"
-		fi
-	fi
+        #get rid of full path and remove the starting / skiplist
+        sed -e "s^$SourceDataPath^^g" -i "$SkipFileNew"
+        sed -e 's/^\///' -i "$SkipFileNew"
 
-	#clear the new SkipFileNew since we just need one, $SkipFileOld
-	> "$SkipFileNew"
+        #check if contents are the same in old and new skipfiles, if not, send an email alerting NMR Manager
+        touch "$SkipFileOld" # in case the file does not exist
+        if ! cmp -s "$SkipFileNew" "$SkipFileOld"; then
+                cp "$SkipFileNew" "$SkipFileOld" #Replace old skipfile with new one
+                SkipFileContents=$(cat $SkipFileNew)
+                if ! [[ "$SkipFileContents" == "" ]]; then #don't bother if the current SkipFile is empty
+                        [[ "$VerboseFlag" == 'y' ]] && {        echo "Some spectra not synced: $SkipFileContents" ; }
+                        Send_Email "$ManagerEmail" "emailtxt_skips" "Duplicate or *. folder name"
+                fi
+        fi
+
+        #clear the new SkipFileNew since we just need one, $SkipFileOld
+        > "$SkipFileNew"
 }
 
 #This function generates a syncfile containing names of spectra to sync
 function make_syncfile () {
 
-	if [[ "$LocalFlag" == 'y' ]]; then
+        if [[ "$LocalFlag" == 'y' ]]; then
 
-		#generate, then transfer a list of user directories ($SyncFile) that have changed recently (in the last $AgeNum $Timescales)
-		#on $Instrument data folder. Order the experiments in the order that they were acquired 
-		cd "$SourceDataPath"; find * -maxdepth $MaxDepthNMR -type d $Age -printf '%T@\t%Tc %6k KiB %p\n' | sort -n | cut -f 2-  					\
-		| grep -o ' KiB .*' | sed -e 's^ KiB ^^g' | cat > "$SyncFile" 
+                #generate, then transfer a list of user directories ($SyncFile) that have changed recently (in the last $AgeNum $Timescales)
+                #on $Instrument data folder. Order the experiments in the order that they were acquired
+                cd "$SourceDataPath"; find * -maxdepth $MaxDepthNMR -type d $Age -printf '%T@\t%Tc %6k KiB %p\n' | sort -n | cut -f 2-                                      \
+                | grep -o ' KiB .*' | sed -e 's^ KiB ^^g' | cat > "$SyncFile"
 
-	else
+        else
 
-		#generate, then transfer a list of user directories ($SyncFile) that have changed recently (in the last $AgeNum $Timescales)
-		#on $Instrument data folder. Order the experiments in the order that they were acquired 
-		"${SSH_cmd[@]}" "cd $SourceDataPath; find * -maxdepth $MaxDepthNMR -type d $Age -printf '%T@\t%Tc %6k KiB %p\n' | sort -n | cut -f 2- " 					\
-		"| grep -o ' KiB .*' | sed -e 's^ KiB ^^g'" | cat > "$SyncFile" 
-	
-	fi
+                #generate, then transfer a list of user directories ($SyncFile) that have changed recently (in the last $AgeNum $Timescales)
+                #on $Instrument data folder. Order the experiments in the order that they were acquired
+                "${SSH_cmd[@]}" "cd $SourceDataPath; find * -maxdepth $MaxDepthNMR -type d $Age -printf '%T@\t%Tc %6k KiB %p\n' | sort -n | cut -f 2- "                                     \
+                "| grep -o ' KiB .*' | sed -e 's^ KiB ^^g'" | cat > "$SyncFile"
 
-	#clean up the $SyncFile
-	sed -i '/^\.$/d' "$SyncFile" #get rid of the "." directory
-	sed -i '/\/nmr$/d' "$SyncFile" #removes lines ending in /nmr
-	sed -i '/\//!d' "$SyncFile" #removes lines lacking / character (just username, no dataset)
-	sed -i '$!N; /^\(.*\)\n\1$/!P; D' "$SyncFile" #removes consecutive duplicate lines
-	sed -i '/^data/d' "$SyncFile" #remove lines starting with 'data' as this would cause issues with topspin vs iconnmr data in some contexts
+        fi
 
-	#prepare the $SyncFileCurrent (synclist.Instrument.current)
+        #clean up the $SyncFile
+        sed -i '/^\.$/d' "$SyncFile" #get rid of the "." directory
+        sed -i '/\/nmr$/d' "$SyncFile" #removes lines ending in /nmr
+        sed -i '/\//!d' "$SyncFile" #removes lines lacking / character (just username, no dataset)
+        sed -i '$!N; /^\(.*\)\n\1$/!P; D' "$SyncFile" #removes consecutive duplicate lines
+        sed -i '/^data/d' "$SyncFile" #remove lines starting with 'data' as this would cause issues with topspin vs iconnmr data in some contexts
 
-	> "$SyncFileCurrent" #clear $SyncFileCurrent
+        #prepare the $SyncFileCurrent (synclist.Instrument.current)
 
-	cat "$SyncFile" >> "$SyncFileCurrent" #put the contents of $SyncFile at the end of the $SyncFileCurrent
-	sed -i '1!G;h;$!d' "$SyncFileCurrent" #reverse order of $SyncFileCurrent
-	perl -i -ne 'print if ! $x{$_}++' "$SyncFileCurrent" #removes nonconsecutive duplicate lines, saving "first" instance
-	sed -i '1!G;h;$!d' "$SyncFileCurrent" #reverse order of $SyncFileCurrent
-	sed -i '/^$/d' "$SyncFileCurrent" # remove empty lines from $SyncFileCurrent
-	Usernames=$(cat "$SyncFileCurrent" | cut -f 1 -d "/" ) #just the usernames
+        > "$SyncFileCurrent" #clear $SyncFileCurrent
 
-	if [[ "$SkipFlag" != "none" ]]; then		
-		grep -v -x -f "$SkipFileOld" "$SyncFileCurrent" > "$SyncFile" # remove from syncfile lines present in skipfile	
-		cp "$SyncFile" "$SyncFileCurrent" #clear synclist.$Instrument" from log folder
-		> "$SyncFile" 
-	else
-		> "$SyncFile" #clear synclist.$Instrument" in log folder
-	fi
+        cat "$SyncFile" >> "$SyncFileCurrent" #put the contents of $SyncFile at the end of the $SyncFileCurrent
+        sed -i '1!G;h;$!d' "$SyncFileCurrent" #reverse order of $SyncFileCurrent
+        perl -i -ne 'print if ! $x{$_}++' "$SyncFileCurrent" #removes nonconsecutive duplicate lines, saving "first" instance
+        sed -i '1!G;h;$!d' "$SyncFileCurrent" #reverse order of $SyncFileCurrent
+        sed -i '/^$/d' "$SyncFileCurrent" # remove empty lines from $SyncFileCurrent
+        Usernames=$(cat "$SyncFileCurrent" | cut -f 1 -d "/" ) #just the usernames
+
+        if [[ "$SkipFlag" != "none" ]]; then
+                grep -v -x -f "$SkipFileOld" "$SyncFileCurrent" > "$SyncFile" # remove from syncfile lines present in skipfile
+                cp "$SyncFile" "$SyncFileCurrent" #clear synclist.$Instrument" from log folder
+                > "$SyncFile"
+        else
+                > "$SyncFile" #clear synclist.$Instrument" in log folder
+        fi
 
 }
 
 #This function makes a syncfile compatible with the "include-from" rsync option
 function make_includefromsyncfile () {
 
-	IncludeFromSyncFile="$LogPath"/synclist."$Instrument".includefrom #Sync file compatible with --include-from
-	Usernames=$(cat "$SyncFileCurrent" | cut -f 1 -d "/" ) #just the usernames
-	PlusNMR=$(echo "$Usernames" | sed -e 's/$/\/nmr/') #usernames plus /nmr
-	PlusStars=$(cat "$SyncFileCurrent" | sed -e 's/$/\/***/') #syncfile plus /***
-	echo "$PlusStars" > "$IncludeFromSyncFile"; cat "$SyncFileCurrent" >> "$IncludeFromSyncFile"; echo "$Usernames" >> "$IncludeFromSyncFile"
-	echo "$PlusNMR" >> "$IncludeFromSyncFile"; sed -i 's/^/+ /' "$IncludeFromSyncFile"; echo '- *' >> "$IncludeFromSyncFile"
-	perl -i -ne 'print if ! $x{$_}++' "$IncludeFromSyncFile" #removes nonconsecutive duplicate lines
+        IncludeFromSyncFile="$LogPath"/synclist."$Instrument".includefrom #Sync file compatible with --include-from
+        Usernames=$(cat "$SyncFileCurrent" | cut -f 1 -d "/" ) #just the usernames
+        PlusNMR=$(echo "$Usernames" | sed -e 's/$/\/nmr/') #usernames plus /nmr
+        PlusStars=$(cat "$SyncFileCurrent" | sed -e 's/$/\/***/') #syncfile plus /***
+        echo "$PlusStars" > "$IncludeFromSyncFile"; cat "$SyncFileCurrent" >> "$IncludeFromSyncFile"; echo "$Usernames" >> "$IncludeFromSyncFile"
+        echo "$PlusNMR" >> "$IncludeFromSyncFile"; sed -i 's/^/+ /' "$IncludeFromSyncFile"; echo '- *' >> "$IncludeFromSyncFile"
+        perl -i -ne 'print if ! $x{$_}++' "$IncludeFromSyncFile" #removes nonconsecutive duplicate lines
 
 }
 
@@ -360,7 +377,7 @@ parse_flags "$@" #function above
 
 #Only proceed if input file is provided
 if [[ "${Input-}" != "" && -f "${Input-}" ]]; then
-	[[ "$VerboseFlag" == 'y' ]] && { echo "Input file is $Input." ; }	
+        [[ "$VerboseFlag" == 'y' ]] && { echo "Input file is $Input." ; }
 else
     echo "No valid input file ("${Input-}" not provided or does not exist)."
     echo ""
@@ -372,6 +389,10 @@ fi
 
 parse_input "$Input" #function above
 
+#Check if script is currently running and wait if so
+
+acquire_lock
+
 #Make the LogPath if it doesn't exist
 
 mkdir -p "$LogPath"
@@ -382,198 +403,201 @@ RsyncVer=$(rsync --version | grep -o "protocol version.*" | cut -d ' ' -f 3)
 
 #Loop through all the instruments in the input file and sync data from each one
 while IFS= read -r -u10 Instrument ; do
-	
-	#get instrument-specific input file info
-	get_instrumentinput #function above
 
-	#open a SSH session with ControlPersist=yes if in manual mode
+        #get instrument-specific input file info
+        get_instrumentinput #function above
 
-	if [[ "$ManualFlag" == "y" ]]; then
-		if [[ "$LocalFlag" == 'y' ]]; then	
-			echo "No SSH information given but ManualFlag is y, do you want a local copy or do you need to add SSHAlias and RemoteUser?"
-			exit 1;
-		else	
-			mkdir -p ~/.ssh/sockets/
-			SSH_cmd=(ssh -o 'ControlPath=~/.ssh/sockets/%r@%h-%p' "$RemoteUser@$SSHAlias")
-			NotUsed=$(${SSH_cmd[@]:0:3} -o ControlMaster=yes -o ControlPersist=yes ${SSH_cmd[3]} pwd )
-		fi
-	else
-		if [[ "$LocalFlag" == 'n' ]]; then
-			SSH_cmd=(ssh "$RemoteUser@$SSHAlias")
-		else
-			[[ "$VerboseFlag" == 'y' ]] && {	echo "Local transfer" ; }	
-		fi
-	fi
-        
-	#Define remote data path to search (with or without /nmr depending on nmrFolderFlag)
-	
-	if [[ "$nmrFolderFlag" == 'n' ]]; then	
-		nmrFolder=''
-		MaxDepthNMR=1
-	else
-		nmrFolder='/nmr'
-		MaxDepthNMR=2
-	fi
+        #open a SSH session with ControlPersist=yes if in manual mode
 
-	>"$SkipFileNew"	#empty skipfile
+        if [[ "$ManualFlag" == "y" ]]; then
+                if [[ "$LocalFlag" == 'y' ]]; then
+                        echo "No SSH information given but ManualFlag is y, do you want a local copy or do you need to add SSHAlias and RemoteUser?"
+                        exit 1;
+                else
+                        mkdir -p ~/.ssh/sockets/
+                        SSH_cmd=(ssh -o 'ControlPath=~/.ssh/sockets/%r@%h-%p' "$RemoteUser@$SSHAlias")
+                        NotUsed=$(${SSH_cmd[@]:0:3} -o ControlMaster=yes -o ControlPersist=yes ${SSH_cmd[3]} pwd )
+                fi
+        else
+                if [[ "$LocalFlag" == 'n' ]]; then
+                        SSH_cmd=(ssh "$RemoteUser@$SSHAlias")
+                else
+                        [[ "$VerboseFlag" == 'y' ]] && {        echo "Local transfer" ; }
+                fi
+        fi
 
-	if [[ "$SkipFlag" != "none" ]]; then	
-		#make the skipfile
-		make_skipfile	#function above
-	fi	
+        #Define remote data path to search (with or without /nmr depending on nmrFolderFlag)
 
-	if [[ "$FullFlag" != "y" ]]; then
-		#make the syncfile
-		make_syncfile	 #function above
-	fi
-	
-	#if the syncfile is not empty (or FullFlag is y) sync files from the folders specified in the syncfile
-	if [[ -s "$SyncFileCurrent" || "$FullFlag" == "y" ]]; then
-		
-		if [[ "$LocalFlag" == 'y' ]]; then
-			Ver="$RsyncVer"	
-			ProtectArgs=$( man rsync | grep protect-args | cat )
-			FilesFrom=$(man rsync | grep files-from | cat )
-		else
-			#Back-compatibility stuff for old rsync
-			#First, determine whether remote machine rsync has files-from as a possible option
-			FilesFrom=$("${SSH_cmd[@]}" "man rsync | grep files-from" | cat )
+        if [[ "$nmrFolderFlag" == 'n' ]]; then
+                nmrFolder=''
+                MaxDepthNMR=1
+        else
+                nmrFolder='/nmr'
+                MaxDepthNMR=2
+        fi
 
-			#Check whether --protect-args is an option as well                
-			ProtectArgs=$("${SSH_cmd[@]}" "man rsync | grep protect-args" | cat )
-	
-			#Get the exact rsync protocol version from the remote machine
-			RemoteRsyncVer=$("${SSH_cmd[@]}" "rsync --version | grep -o 'protocol version.*' | cut -d ' ' -f 3")
+        >"$SkipFileNew" #empty skipfile
 
-			if [[ "$RsyncVer" -gt "$RemoteRsyncVer" ]]; then
-				Ver="$RemoteRsyncVer"  #version to actually use
-			else
-				Ver="$RsyncVer"		  #version to actually use		
-			fi
-		fi
+        if [[ "$SkipFlag" != "none" ]]; then
+                #make the skipfile
+                make_skipfile   #function above
+        fi
 
-		RsyncOptions_0=(--protocol="$Ver") #first rsync option 
+        if [[ "$FullFlag" != "y" ]]; then
+                #make the syncfile
+                make_syncfile    #function above
+        fi
 
-		RsyncInstrOpts_1=() #empty the array
-		
-		if [[ "$ProtectArgs" == "" ]]; then  #remove --protect-args from rsync options if it's not compatible with remote rsync version
-		
-			RsyncInstrOpts_1str=$(echo $RsyncOptions_1 | sed 's/--protect-args//g')
-			RsyncInstrOpts_1=($RsyncInstrOpts_1str) # split into an array
+        #if the syncfile is not empty (or FullFlag is y) sync files from the folders specified in the syncfile
+        if [[ -s "$SyncFileCurrent" || "$FullFlag" == "y" ]]; then
 
-		else
-			RsyncInstrOpts_1=($RsyncOptions_1) # split into an array
-		fi
+                if [[ "$LocalFlag" == 'y' ]]; then
+                        Ver="$RsyncVer"
+                        ProtectArgs=$( man rsync | grep protect-args | cat )
+                        FilesFrom=$(man rsync | grep files-from | cat )
+                else
+                        #Back-compatibility stuff for old rsync
+                        #First, determine whether remote machine rsync has files-from as a possible option
+                        FilesFrom=$("${SSH_cmd[@]}" "man rsync | grep files-from" | cat )
 
-		if [[ "$FilesFrom" == "" ]]; then #if $FilesFrom is empty, then we need to make a more complex syncfile, "$IncludeFromSyncFile"
-			make_includefromsyncfile		#function above
-		fi
-		
-		if [[ "$ExcludeFlag" != "n" ]]; then
-			RsyncOptions_0+=(--exclude-from="$ExcludeList")
-		fi
+                        #Check whether --protect-args is an option as well
+                        ProtectArgs=$("${SSH_cmd[@]}" "man rsync | grep protect-args" | cat )
 
-		if [[ "$SkipFlag" != "none" ]]; then
-			if [[ "$sortbyuserFlag" == "y" ]]; then
-				##we're using $SkipFileUserSpecific now
-				RsyncOptions_0+=(--exclude-from="$SkipFileUserSpecific")
-			else
-				RsyncOptions_0+=(--exclude-from="$SkipFileOld")
-			fi
+                        #Get the exact rsync protocol version from the remote machine
+                        RemoteRsyncVer=$("${SSH_cmd[@]}" "rsync --version | grep -o 'protocol version.*' | cut -d ' ' -f 3")
 
-		fi
-			
-		if [[ "$FullFlag" != "y" && "$FilesFrom" == "" ]]; then
+                        if [[ "$RsyncVer" -gt "$RemoteRsyncVer" ]]; then
+                                Ver="$RemoteRsyncVer"  #version to actually use
+                        else
+                                Ver="$RsyncVer"           #version to actually use
+                        fi
+                fi
+
+                RsyncOptions_0=(--protocol="$Ver") #first rsync option
+
+                RsyncInstrOpts_1=() #empty the array
+
+                if [[ "$ProtectArgs" == "" ]]; then  #remove --protect-args from rsync options if it's not compatible with remote rsync version
+
+                        RsyncInstrOpts_1str=$(echo $RsyncOptions_1 | sed 's/--protect-args//g')
+                        RsyncInstrOpts_1=($RsyncInstrOpts_1str) # split into an array
+
+                else
+                        RsyncInstrOpts_1=($RsyncOptions_1) # split into an array
+                fi
+
+                if [[ "$FilesFrom" == "" ]]; then #if $FilesFrom is empty, then we need to make a more complex syncfile, "$IncludeFromSyncFile"
+                        make_includefromsyncfile                #function above
+                fi
+
+                if [[ "$ExcludeFlag" != "n" ]]; then
+                        RsyncOptions_0+=(--exclude-from="$ExcludeList")
+                fi
+
+                if [[ "$SkipFlag" != "none" ]]; then
+                        if [[ "$sortbyuserFlag" == "y" ]]; then
+                                ##we're using $SkipFileUserSpecific now
+                                RsyncOptions_0+=(--exclude-from="$SkipFileUserSpecific")
+                        else
+                                RsyncOptions_0+=(--exclude-from="$SkipFileOld")
+                        fi
+
+                fi
+
+                if [[ "$FullFlag" != "y" && "$FilesFrom" == "" ]]; then
 
             if [[ "$sortbyuserFlag" == "y" ]]; then
-				echo "Sort by user not currently supported with your version of rsync--exiting"
-				exit 1
+                                echo "Sort by user not currently supported with your version of rsync--exiting"
+                                exit 1
             else
                 RsyncOptions_0+=(--include-from="$IncludeFromSyncFile")
             fi
 
-		elif [[ "$FullFlag" != "y" ]]; then
-	        if [[ "$sortbyuserFlag" == "y" ]]; then
+                elif [[ "$FullFlag" != "y" ]]; then
+                if [[ "$sortbyuserFlag" == "y" ]]; then
             ##we're using $SyncFileUserSpecific now
-				RsyncOptions_0+=(--files-from="$SyncFileUserSpecific")
-			else
-				RsyncOptions_0+=(--files-from="$SyncFileCurrent")
-			fi
-		fi	
-		
-		if [[ "$nmrFolderFlag" == "y" ]]; then
-			nmrstring='/nmr'
-			nmrstring2='\/nmr'
-		else
-			nmrstring=''
-			nmrstring2=''
-		fi
+                                RsyncOptions_0+=(--files-from="$SyncFileUserSpecific")
+                        else
+                                RsyncOptions_0+=(--files-from="$SyncFileCurrent")
+                        fi
+                fi
 
-		## sync data over
-		
-		RsyncInstrOpts_1+=(${RsyncOptions_0[@]}) 	
+                if [[ "$nmrFolderFlag" == "y" ]]; then
+                        nmrstring='/nmr'
+                        nmrstring2='\/nmr'
+                else
+                        nmrstring=''
+                        nmrstring2=''
+                fi
+
+                ## sync data over
+
+                RsyncInstrOpts_1+=(${RsyncOptions_0[@]})
 
                         if [[ "$sortbyuserFlag" == "y" ]]; then
 
-               			Usernames_unique=$(echo -e "${Usernames// /\\n}" | sort -u)
-				
-                		for Current_Username in $Usernames_unique
-                        	do
+                                Usernames_unique=$(echo -e "${Usernames// /\\n}" | sort -u)
 
-	                        #make a file with just the spectra in nmr of that username (grep $Current_Username $SyncFileCurrent | cut some stuff)
-         	                grep "$Current_Username" "$SyncFileCurrent" > "$SyncFileUserSpecific"
-                	        sed -i 's/'"$Current_Username$nmrstring2"'\///' "$SyncFileUserSpecific"
+                                for Current_Username in $Usernames_unique
+                                do
 
-                        	#make a file with just the skipped spectra in nmr of that username (grep $Current_Username $SyncFileCurrent | cut some stuff)
-      		                grep "$Current_Username" "$SkipFileOld" > "$SkipFileUserSpecific"
-                 	        sed -i 's/'"$Current_Username$nmrstring2"'\///' "$SkipFileUserSpecific"
-							
-							[[ "$VerboseFlag" == 'y' ]] && {	echo "Syncing from $SourceDataPath/$Current_Username$nmrstring on $Instrument to $DestinationDataPath/$Current_Username/$Instrument/." ; }	
-        	                mkdir -p "$DestinationDataPath/$Current_Username/$Instrument/" #Make destination path if it doesn't exist
+                                #make a file with just the spectra in nmr of that username (grep $Current_Username $SyncFileCurrent | cut some stuff)
+                                grep "$Current_Username" "$SyncFileCurrent" > "$SyncFileUserSpecific"
+                                sed -i 's/'"$Current_Username$nmrstring2"'\///' "$SyncFileUserSpecific"
 
-                	        #add $Current_Username$nmrstring to $SourceDataPath but $DestinationDataPath has $Current_Username\$Instrument\ added (in input it will just be /home/nmruser or something)
+                                #make a file with just the skipped spectra in nmr of that username (grep $Current_Username $SyncFileCurrent | cut some stuff)
+                                grep "$Current_Username" "$SkipFileOld" > "$SkipFileUserSpecific"
+                                sed -i 's/'"$Current_Username$nmrstring2"'\///' "$SkipFileUserSpecific"
 
-                        	if [ $ManualFlag == 'y' ]; then
-             	                rsync "${RsyncInstrOpts_1[@]}" -e "ssh -o "${SSH_cmd[2]}"" "$RemoteUser@$SSHAlias:$SourceDataPath/$Current_Username$nmrstring/" "$DestinationDataPath/$Current_Username/$Instrument/"					
-     	                        else
-								if [[ "$LocalFlag" == 'y' ]]; then
-									echo "${RsyncInstrOpts_1[@]}"
-									rsync "${RsyncInstrOpts_1[@]}" "$SourceDataPath/$Current_Username$nmrstring/" "$DestinationDataPath/$Current_Username/$Instrument/"	
-								else
-									rsync "${RsyncInstrOpts_1[@]}" -e ""${SSH_cmd[@]}:$SourceDataPath/$Current_Username$nmrstring/"" "$DestinationDataPath/$Current_Username/$Instrument/"	
-								fi        
-							fi
-							
-						done
+                                                        [[ "$VerboseFlag" == 'y' ]] && {        echo "Syncing from $SourceDataPath/$Current_Username$nmrstring on $Instrument to $DestinationDataPath/$Current_Username/$Instrument/." ; }
+                                mkdir -p "$DestinationDataPath/$Current_Username/$Instrument/" #Make destination path if it doesn't exist
+
+                                #add $Current_Username$nmrstring to $SourceDataPath but $DestinationDataPath has $Current_Username\$Instrument\ added (in input it will just be /home/nmruser or something)
+
+                                if [ $ManualFlag == 'y' ]; then
+                                rsync "${RsyncInstrOpts_1[@]}" -e "ssh -o "${SSH_cmd[2]}"" "$RemoteUser@$SSHAlias:$SourceDataPath/$Current_Username$nmrstring/" "$DestinationDataPath/$Current_Username/$Instrument/"
+                                else
+                                                                if [[ "$LocalFlag" == 'y' ]]; then
+                                                                        echo "${RsyncInstrOpts_1[@]}"
+                                                                        rsync "${RsyncInstrOpts_1[@]}" "$SourceDataPath/$Current_Username$nmrstring/" "$DestinationDataPath/$Current_Username/$Instrument/"
+                                                                else
+                                                                        rsync "${RsyncInstrOpts_1[@]}" -e ""${SSH_cmd[@]}:$SourceDataPath/$Current_Username$nmrstring/"" "$DestinationDataPath/$Current_Username/$Instrument/"
+                                                                fi
+                                                        fi
+
+                                                done
 
 
                         else
 
-						[[ "$VerboseFlag" == 'y' ]] && {	echo "Syncing from $SourceDataPath on $Instrument to $DestinationDataPath." ; }	
+                                                [[ "$VerboseFlag" == 'y' ]] && {        echo "Syncing from $SourceDataPath on $Instrument to $DestinationDataPath." ; }
 
-		                mkdir -p "$DestinationDataPath" #Make destination path if it doesn't exist
+                                mkdir -p "$DestinationDataPath" #Make destination path if it doesn't exist
 
-                		if [ $ManualFlag == 'y' ]; then
-                        	rsync "${RsyncInstrOpts_1[@]}" -e "ssh -o "${SSH_cmd[2]}"" "$RemoteUser@$SSHAlias:$SourceDataPath/" "$DestinationDataPath/"
-                		else
-							if [[ "$LocalFlag" == 'y' ]]; then
-								echo "${RsyncInstrOpts_1[@]} $SourceDataPath/ $DestinationDataPath/"
-								rsync "${RsyncInstrOpts_1[@]}" "$SourceDataPath/" "$DestinationDataPath/"
-							else
-								rsync "${RsyncInstrOpts_1[@]}" -e ""${SSH_cmd[@]}:$SourceDataPath/"" "$DestinationDataPath/"
-							fi
-                		fi
-			fi
+                                if [ $ManualFlag == 'y' ]; then
+                                rsync "${RsyncInstrOpts_1[@]}" -e "ssh -o "${SSH_cmd[2]}"" "$RemoteUser@$SSHAlias:$SourceDataPath/" "$DestinationDataPath/"
+                                else
+                                                        if [[ "$LocalFlag" == 'y' ]]; then
+                                                                echo "${RsyncInstrOpts_1[@]} $SourceDataPath/ $DestinationDataPath/"
+                                                                rsync "${RsyncInstrOpts_1[@]}" "$SourceDataPath/" "$DestinationDataPath/"
+                                                        else
+                                                                rsync "${RsyncInstrOpts_1[@]}" -e ""${SSH_cmd[@]}:$SourceDataPath/"" "$DestinationDataPath/"
+                                                        fi
+                                fi
+                        fi
 
-		if [[ -f "$SyncFileCurrent" ]]; then
-			cp "$SyncFileCurrent" "$SyncFileOld"  
-			> "$SyncFileCurrent" #clear synclist.Instrument.current" from log folder
-		fi
-		
-		if [ $ManualFlag == 'y' ]; then
-			"${SSH_cmd[@]}" -O exit		 
-		fi
+                if [[ -f "$SyncFileCurrent" ]]; then
+                        cp "$SyncFileCurrent" "$SyncFileOld"
+                        > "$SyncFileCurrent" #clear synclist.Instrument.current" from log folder
+                fi
 
-	fi
+                if [ $ManualFlag == 'y' ]; then
+                        "${SSH_cmd[@]}" -O exit
+                fi
+
+        fi
 
 done 10< <(echo "${Instrument_Array}")
+
+#delete $LockFile so the script can run again
+release_lock
